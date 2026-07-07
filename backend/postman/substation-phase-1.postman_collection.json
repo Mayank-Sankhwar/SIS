@@ -1,0 +1,81 @@
+{
+  "info": {
+    "name": "Substation Phase 1",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api/v1"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "subVerticalId",
+      "value": ""
+    },
+    {
+      "key": "substationId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Create Substation",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/substations",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"subVerticalId\": \"{{subVerticalId}}\",\n  \"name\": \"Central 33/11 KV Substation\",\n  \"code\": \"SS-CENTRAL-01\",\n  \"voltageLevelKv\": 33,\n  \"address\": \"Central Industrial Area\",\n  \"latitude\": 23.259933,\n  \"longitude\": 77.412613,\n  \"commissioningDate\": \"2024-01-15\",\n  \"isActive\": true\n}"
+        }
+      }
+    },
+    {
+      "name": "Get Substation by ID",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{baseUrl}}/substations/{{substationId}}"
+      }
+    },
+    {
+      "name": "Update Substation",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/substations/{{substationId}}",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Central 33/11 KV Substation Updated\",\n  \"address\": \"Central Industrial Area, Block B\",\n  \"latitude\": 23.260001,\n  \"longitude\": 77.413001,\n  \"voltageLevelKv\": 33,\n  \"commissioningDate\": \"2024-01-15\",\n  \"isActive\": true\n}"
+        }
+      }
+    }
+  ]
+}

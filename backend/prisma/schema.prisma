@@ -1,0 +1,638 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum RoleName {
+  ADMIN
+  EE
+  AE
+  JE
+}
+
+enum AreaType {
+  DISCOM
+  ZONE
+  VERTICAL
+  SUB_VERTICAL
+  SUBSTATION
+}
+
+enum ImportJobStatus {
+  PENDING
+  VALIDATING
+  FAILED_VALIDATION
+  PROCESSING
+  COMPLETED
+  COMPLETED_WITH_ERRORS
+  FAILED
+}
+
+enum ImportType {
+  DISCOM
+  ZONE
+  VERTICAL
+  SUB_VERTICAL
+  SUBSTATION
+  INCOMING_SOURCE
+  OUTGOING_FEEDER
+  TRANSFORMER
+  LIGHTNING_ARRESTER
+  BATTERY_BANK
+  CAPACITOR_BANK
+}
+
+model Role {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      RoleName @unique
+  users     User[]   @relation("RoleUsers")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("roles")
+}
+
+model User {
+  id                        String              @id @default(uuid()) @db.Uuid
+  roleId                    String              @map("role_id") @db.Uuid
+  parentUserId              String?             @map("parent_user_id") @db.Uuid
+  name                      String              @db.VarChar(150)
+  email                     String              @unique @db.VarChar(255)
+  mobileNumber              String?             @unique @map("mobile_number") @db.VarChar(20)
+  employeeId                String?             @unique @map("employee_id") @db.VarChar(100)
+  designation               String?             @db.VarChar(150)
+  profileData               Json?               @map("profile_data")
+  profileCompleted          Boolean             @default(false) @map("profile_completed")
+  requirePasswordChange     Boolean             @default(false) @map("require_password_change")
+  passwordHash              String              @map("password_hash")
+  isActive                  Boolean             @default(true) @map("is_active")
+  createdById               String?             @map("created_by") @db.Uuid
+  updatedById               String?             @map("updated_by") @db.Uuid
+  deletedById               String?             @map("deleted_by") @db.Uuid
+  deletedAt                 DateTime?           @map("deleted_at") @db.Timestamptz(6)
+  createdAt                 DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                 DateTime            @updatedAt @map("updated_at") @db.Timestamptz(6)
+  role                      Role                @relation("RoleUsers", fields: [roleId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  parentUser                User?               @relation("UserReportingHierarchy", fields: [parentUserId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  subordinateUsers          User[]              @relation("UserReportingHierarchy")
+  createdBy                 User?               @relation("UserCreatedBy", fields: [createdById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  createdUsers              User[]              @relation("UserCreatedBy")
+  updatedBy                 User?               @relation("UserUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  updatedUsers              User[]              @relation("UserUpdatedBy")
+  deletedBy                 User?               @relation("UserDeletedBy", fields: [deletedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  deletedUsers              User[]              @relation("UserDeletedBy")
+  areaMappings              UserAreaMapping[]   @relation("UserAreaMappings")
+  uploadedFiles             UploadedFile[]      @relation("UploadedFilesUploadedBy")
+  createdImportJobs         ImportJob[]         @relation("ImportJobsCreatedBy")
+  updatedImportJobs         ImportJob[]         @relation("ImportJobsUpdatedBy")
+  deletedFiles              UploadedFile[]      @relation("UploadedFilesDeletedBy")
+  createdAreaMappings       UserAreaMapping[]   @relation("UserAreaMappingsCreatedBy")
+  updatedAreaMappings       UserAreaMapping[]   @relation("UserAreaMappingsUpdatedBy")
+  deletedAreaMappings       UserAreaMapping[]   @relation("UserAreaMappingsDeletedBy")
+  createdDiscoms            Discom[]            @relation("DiscomCreatedBy")
+  updatedDiscoms            Discom[]            @relation("DiscomUpdatedBy")
+  deletedDiscoms            Discom[]            @relation("DiscomDeletedBy")
+  createdZones              Zone[]              @relation("ZoneCreatedBy")
+  updatedZones              Zone[]              @relation("ZoneUpdatedBy")
+  deletedZones              Zone[]              @relation("ZoneDeletedBy")
+  createdVerticals          Vertical[]          @relation("VerticalCreatedBy")
+  updatedVerticals          Vertical[]          @relation("VerticalUpdatedBy")
+  deletedVerticals          Vertical[]          @relation("VerticalDeletedBy")
+  createdSubVerticals       SubVertical[]       @relation("SubVerticalCreatedBy")
+  updatedSubVerticals       SubVertical[]       @relation("SubVerticalUpdatedBy")
+  deletedSubVerticals       SubVertical[]       @relation("SubVerticalDeletedBy")
+  createdSubstations        Substation[]        @relation("SubstationCreatedBy")
+  updatedSubstations        Substation[]        @relation("SubstationUpdatedBy")
+  deletedSubstations        Substation[]        @relation("SubstationDeletedBy")
+  createdIncomingSources    IncomingSource[]    @relation("IncomingSourceCreatedBy")
+  updatedIncomingSources    IncomingSource[]    @relation("IncomingSourceUpdatedBy")
+  deletedIncomingSources    IncomingSource[]    @relation("IncomingSourceDeletedBy")
+  createdTransformers       Transformer[]       @relation("TransformerCreatedBy")
+  updatedTransformers       Transformer[]       @relation("TransformerUpdatedBy")
+  deletedTransformers       Transformer[]       @relation("TransformerDeletedBy")
+  createdOutgoingFeeders    OutgoingFeeder[]    @relation("OutgoingFeederCreatedBy")
+  updatedOutgoingFeeders    OutgoingFeeder[]    @relation("OutgoingFeederUpdatedBy")
+  deletedOutgoingFeeders    OutgoingFeeder[]    @relation("OutgoingFeederDeletedBy")
+  createdLightningArresters LightningArrester[] @relation("LightningArresterCreatedBy")
+  updatedLightningArresters LightningArrester[] @relation("LightningArresterUpdatedBy")
+  deletedLightningArresters LightningArrester[] @relation("LightningArresterDeletedBy")
+  createdBatteryBanks       BatteryBank[]       @relation("BatteryBankCreatedBy")
+  updatedBatteryBanks       BatteryBank[]       @relation("BatteryBankUpdatedBy")
+  deletedBatteryBanks       BatteryBank[]       @relation("BatteryBankDeletedBy")
+  createdCapacitorBanks     CapacitorBank[]     @relation("CapacitorBankCreatedBy")
+  updatedCapacitorBanks     CapacitorBank[]     @relation("CapacitorBankUpdatedBy")
+  deletedCapacitorBanks     CapacitorBank[]     @relation("CapacitorBankDeletedBy")
+
+  @@index([roleId], map: "idx_users_role_id")
+  @@index([parentUserId], map: "idx_users_parent_user_id")
+  @@index([isActive], map: "idx_users_is_active")
+  @@index([profileCompleted], map: "idx_users_profile_completed")
+  @@index([requirePasswordChange], map: "idx_users_require_password_change")
+  @@index([deletedAt], map: "idx_users_deleted_at")
+  @@index([createdById], map: "idx_users_created_by")
+  @@index([updatedById], map: "idx_users_updated_by")
+  @@index([deletedById], map: "idx_users_deleted_by")
+  @@map("users")
+}
+
+model UserAreaMapping {
+  id            String       @id @default(uuid()) @db.Uuid
+  userId        String       @map("user_id") @db.Uuid
+  areaType      AreaType     @map("area_type")
+  discomId      String?      @map("discom_id") @db.Uuid
+  zoneId        String?      @map("zone_id") @db.Uuid
+  verticalId    String?      @map("vertical_id") @db.Uuid
+  subVerticalId String?      @map("sub_vertical_id") @db.Uuid
+  substationId  String?      @map("substation_id") @db.Uuid
+  isPrimary     Boolean      @default(false) @map("is_primary")
+  isActive      Boolean      @default(true) @map("is_active")
+  createdById   String?      @map("created_by") @db.Uuid
+  updatedById   String?      @map("updated_by") @db.Uuid
+  deletedById   String?      @map("deleted_by") @db.Uuid
+  deletedAt     DateTime?    @map("deleted_at") @db.Timestamptz(6)
+  createdAt     DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
+  user          User         @relation("UserAreaMappings", fields: [userId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  discom        Discom?      @relation("DiscomUserAreaMappings", fields: [discomId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  zone          Zone?        @relation("ZoneUserAreaMappings", fields: [zoneId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  vertical      Vertical?    @relation("VerticalUserAreaMappings", fields: [verticalId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  subVertical   SubVertical? @relation("SubVerticalUserAreaMappings", fields: [subVerticalId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  substation    Substation?  @relation("SubstationUserAreaMappings", fields: [substationId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  createdBy     User?        @relation("UserAreaMappingsCreatedBy", fields: [createdById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  updatedBy     User?        @relation("UserAreaMappingsUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  deletedBy     User?        @relation("UserAreaMappingsDeletedBy", fields: [deletedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@unique([userId, discomId], map: "uq_user_area_mappings_user_id_discom_id")
+  @@unique([userId, zoneId], map: "uq_user_area_mappings_user_id_zone_id")
+  @@unique([userId, verticalId], map: "uq_user_area_mappings_user_id_vertical_id")
+  @@unique([userId, subVerticalId], map: "uq_user_area_mappings_user_id_sub_vertical_id")
+  @@unique([userId, substationId], map: "uq_user_area_mappings_user_id_substation_id")
+  @@index([userId], map: "idx_user_area_mappings_user_id")
+  @@index([areaType], map: "idx_user_area_mappings_area_type")
+  @@index([discomId], map: "idx_user_area_mappings_discom_id")
+  @@index([zoneId], map: "idx_user_area_mappings_zone_id")
+  @@index([verticalId], map: "idx_user_area_mappings_vertical_id")
+  @@index([subVerticalId], map: "idx_user_area_mappings_sub_vertical_id")
+  @@index([substationId], map: "idx_user_area_mappings_substation_id")
+  @@index([isActive], map: "idx_user_area_mappings_is_active")
+  @@index([deletedAt], map: "idx_user_area_mappings_deleted_at")
+  @@index([createdById], map: "idx_user_area_mappings_created_by")
+  @@index([updatedById], map: "idx_user_area_mappings_updated_by")
+  @@index([deletedById], map: "idx_user_area_mappings_deleted_by")
+  @@map("user_area_mappings")
+}
+
+model Discom {
+  id           String            @id @default(uuid()) @db.Uuid
+  name         String            @unique @db.VarChar(150)
+  code         String            @unique @db.VarChar(50)
+  isActive     Boolean           @default(true) @map("is_active")
+  createdById  String?           @map("created_by") @db.Uuid
+  updatedById  String?           @map("updated_by") @db.Uuid
+  deletedById  String?           @map("deleted_by") @db.Uuid
+  deletedAt    DateTime?         @map("deleted_at") @db.Timestamptz(6)
+  createdAt    DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime          @updatedAt @map("updated_at") @db.Timestamptz(6)
+  zones        Zone[]            @relation("DiscomZones")
+  areaMappings UserAreaMapping[] @relation("DiscomUserAreaMappings")
+  createdBy    User?             @relation("DiscomCreatedBy", fields: [createdById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  updatedBy    User?             @relation("DiscomUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  deletedBy    User?             @relation("DiscomDeletedBy", fields: [deletedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@index([isActive], map: "idx_discoms_is_active")
+  @@index([deletedAt], map: "idx_discoms_deleted_at")
+  @@index([createdById], map: "idx_discoms_created_by")
+  @@index([updatedById], map: "idx_discoms_updated_by")
+  @@index([deletedById], map: "idx_discoms_deleted_by")
+  @@map("discoms")
+}
+
+model Zone {
+  id           String            @id @default(uuid()) @db.Uuid
+  discomId     String            @map("discom_id") @db.Uuid
+  name         String            @db.VarChar(150)
+  code         String            @db.VarChar(50)
+  isActive     Boolean           @default(true) @map("is_active")
+  createdById  String?           @map("created_by") @db.Uuid
+  updatedById  String?           @map("updated_by") @db.Uuid
+  deletedById  String?           @map("deleted_by") @db.Uuid
+  deletedAt    DateTime?         @map("deleted_at") @db.Timestamptz(6)
+  createdAt    DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime          @updatedAt @map("updated_at") @db.Timestamptz(6)
+  discom       Discom            @relation("DiscomZones", fields: [discomId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  verticals    Vertical[]        @relation("ZoneVerticals")
+  areaMappings UserAreaMapping[] @relation("ZoneUserAreaMappings")
+  createdBy    User?             @relation("ZoneCreatedBy", fields: [createdById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  updatedBy    User?             @relation("ZoneUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  deletedBy    User?             @relation("ZoneDeletedBy", fields: [deletedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@unique([discomId, name], map: "uq_zones_discom_id_name")
+  @@unique([discomId, code], map: "uq_zones_discom_id_code")
+  @@index([discomId], map: "idx_zones_discom_id")
+  @@index([isActive], map: "idx_zones_is_active")
+  @@index([deletedAt], map: "idx_zones_deleted_at")
+  @@index([createdById], map: "idx_zones_created_by")
+  @@index([updatedById], map: "idx_zones_updated_by")
+  @@index([deletedById], map: "idx_zones_deleted_by")
+  @@map("zones")
+}
+
+model Vertical {
+  id           String            @id @default(uuid()) @db.Uuid
+  zoneId       String            @map("zone_id") @db.Uuid
+  name         String            @db.VarChar(150)
+  code         String            @db.VarChar(50)
+  isActive     Boolean           @default(true) @map("is_active")
+  createdById  String?           @map("created_by") @db.Uuid
+  updatedById  String?           @map("updated_by") @db.Uuid
+  deletedById  String?           @map("deleted_by") @db.Uuid
+  deletedAt    DateTime?         @map("deleted_at") @db.Timestamptz(6)
+  createdAt    DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime          @updatedAt @map("updated_at") @db.Timestamptz(6)
+  zone         Zone              @relation("ZoneVerticals", fields: [zoneId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  subVerticals SubVertical[]     @relation("VerticalSubVerticals")
+  areaMappings UserAreaMapping[] @relation("VerticalUserAreaMappings")
+  createdBy    User?             @relation("VerticalCreatedBy", fields: [createdById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  updatedBy    User?             @relation("VerticalUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  deletedBy    User?             @relation("VerticalDeletedBy", fields: [deletedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@unique([zoneId, name], map: "uq_verticals_zone_id_name")
+  @@unique([zoneId, code], map: "uq_verticals_zone_id_code")
+  @@index([zoneId], map: "idx_verticals_zone_id")
+  @@index([isActive], map: "idx_verticals_is_active")
+  @@index([deletedAt], map: "idx_verticals_deleted_at")
+  @@index([createdById], map: "idx_verticals_created_by")
+  @@index([updatedById], map: "idx_verticals_updated_by")
+  @@index([deletedById], map: "idx_verticals_deleted_by")
+  @@map("verticals")
+}
+
+model SubVertical {
+  id           String            @id @default(uuid()) @db.Uuid
+  verticalId   String            @map("vertical_id") @db.Uuid
+  name         String            @db.VarChar(150)
+  code         String            @db.VarChar(50)
+  isActive     Boolean           @default(true) @map("is_active")
+  createdById  String?           @map("created_by") @db.Uuid
+  updatedById  String?           @map("updated_by") @db.Uuid
+  deletedById  String?           @map("deleted_by") @db.Uuid
+  deletedAt    DateTime?         @map("deleted_at") @db.Timestamptz(6)
+  createdAt    DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime          @updatedAt @map("updated_at") @db.Timestamptz(6)
+  vertical     Vertical          @relation("VerticalSubVerticals", fields: [verticalId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  substations  Substation[]      @relation("SubVerticalSubstations")
+  areaMappings UserAreaMapping[] @relation("SubVerticalUserAreaMappings")
+  createdBy    User?             @relation("SubVerticalCreatedBy", fields: [createdById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  updatedBy    User?             @relation("SubVerticalUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  deletedBy    User?             @relation("SubVerticalDeletedBy", fields: [deletedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@unique([verticalId, name], map: "uq_sub_verticals_vertical_id_name")
+  @@unique([verticalId, code], map: "uq_sub_verticals_vertical_id_code")
+  @@index([verticalId], map: "idx_sub_verticals_vertical_id")
+  @@index([isActive], map: "idx_sub_verticals_is_active")
+  @@index([deletedAt], map: "idx_sub_verticals_deleted_at")
+  @@index([createdById], map: "idx_sub_verticals_created_by")
+  @@index([updatedById], map: "idx_sub_verticals_updated_by")
+  @@index([deletedById], map: "idx_sub_verticals_deleted_by")
+  @@map("sub_verticals")
+}
+
+model Substation {
+  id                 String              @id @default(uuid()) @db.Uuid
+  subVerticalId      String              @map("sub_vertical_id") @db.Uuid
+  name               String              @db.VarChar(150)
+  code               String              @db.VarChar(50)
+  voltageLevelKv     Decimal             @map("voltage_level_kv") @db.Decimal(8, 2)
+  address            String?
+  latitude           Decimal?            @db.Decimal(10, 7)
+  longitude          Decimal?            @db.Decimal(10, 7)
+  commissioningDate  DateTime?           @map("commissioning_date") @db.Date
+  isActive           Boolean             @default(true) @map("is_active")
+  createdById        String?             @map("created_by") @db.Uuid
+  updatedById        String?             @map("updated_by") @db.Uuid
+  deletedById        String?             @map("deleted_by") @db.Uuid
+  deletedAt          DateTime?           @map("deleted_at") @db.Timestamptz(6)
+  createdAt          DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime            @updatedAt @map("updated_at") @db.Timestamptz(6)
+  subVertical        SubVertical         @relation("SubVerticalSubstations", fields: [subVerticalId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  incomingSources    IncomingSource[]    @relation("SubstationIncomingSources")
+  transformers       Transformer[]       @relation("SubstationTransformers")
+  outgoingFeeders    OutgoingFeeder[]    @relation("SubstationOutgoingFeeders")
+  lightningArresters LightningArrester[] @relation("SubstationLightningArresters")
+  batteryBanks       BatteryBank[]       @relation("SubstationBatteryBanks")
+  capacitorBanks     CapacitorBank[]     @relation("SubstationCapacitorBanks")
+  areaMappings       UserAreaMapping[]   @relation("SubstationUserAreaMappings")
+  createdBy          User?               @relation("SubstationCreatedBy", fields: [createdById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  updatedBy          User?               @relation("SubstationUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  deletedBy          User?               @relation("SubstationDeletedBy", fields: [deletedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@unique([subVerticalId, name], map: "uq_substations_sub_vertical_id_name")
+  @@unique([subVerticalId, code], map: "uq_substations_sub_vertical_id_code")
+  @@index([subVerticalId], map: "idx_substations_sub_vertical_id")
+  @@index([voltageLevelKv], map: "idx_substations_voltage_level_kv")
+  @@index([isActive], map: "idx_substations_is_active")
+  @@index([deletedAt], map: "idx_substations_deleted_at")
+  @@index([createdById], map: "idx_substations_created_by")
+  @@index([updatedById], map: "idx_substations_updated_by")
+  @@index([deletedById], map: "idx_substations_deleted_by")
+  @@map("substations")
+}
+
+model IncomingSource {
+  id             String     @id @default(uuid()) @db.Uuid
+  substationId   String     @map("substation_id") @db.Uuid
+  sourceName     String     @map("source_name") @db.VarChar(150)
+  sourceType     String?    @map("source_type") @db.VarChar(50)
+  voltageLevelKv Decimal    @map("voltage_level_kv") @db.Decimal(8, 2)
+  feederName     String?    @map("feeder_name") @db.VarChar(150)
+  meterNumber    String?    @map("meter_number") @db.VarChar(100)
+  isActive       Boolean    @default(true) @map("is_active")
+  createdById    String?    @map("created_by") @db.Uuid
+  updatedById    String?    @map("updated_by") @db.Uuid
+  deletedById    String?    @map("deleted_by") @db.Uuid
+  deletedAt      DateTime?  @map("deleted_at") @db.Timestamptz(6)
+  createdAt      DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
+  substation     Substation @relation("SubstationIncomingSources", fields: [substationId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  createdBy      User?      @relation("IncomingSourceCreatedBy", fields: [createdById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  updatedBy      User?      @relation("IncomingSourceUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  deletedBy      User?      @relation("IncomingSourceDeletedBy", fields: [deletedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@unique([substationId, sourceName], map: "uq_incoming_sources_substation_id_source_name")
+  @@index([substationId], map: "idx_incoming_sources_substation_id")
+  @@index([voltageLevelKv], map: "idx_incoming_sources_voltage_level_kv")
+  @@index([isActive], map: "idx_incoming_sources_is_active")
+  @@index([deletedAt], map: "idx_incoming_sources_deleted_at")
+  @@index([createdById], map: "idx_incoming_sources_created_by")
+  @@index([updatedById], map: "idx_incoming_sources_updated_by")
+  @@index([deletedById], map: "idx_incoming_sources_deleted_by")
+  @@map("incoming_sources")
+}
+
+model Transformer {
+  id                 String     @id @default(uuid()) @db.Uuid
+  substationId       String     @map("substation_id") @db.Uuid
+  transformerCode    String     @map("transformer_code") @db.VarChar(100)
+  capacityMva        Decimal    @map("capacity_mva") @db.Decimal(10, 2)
+  primaryVoltageKv   Decimal    @map("primary_voltage_kv") @db.Decimal(8, 2)
+  secondaryVoltageKv Decimal    @map("secondary_voltage_kv") @db.Decimal(8, 2)
+  make               String?    @db.VarChar(150)
+  serialNumber       String?    @unique @map("serial_number") @db.VarChar(150)
+  commissioningDate  DateTime?  @map("commissioning_date") @db.Date
+  isActive           Boolean    @default(true) @map("is_active")
+  createdById        String?    @map("created_by") @db.Uuid
+  updatedById        String?    @map("updated_by") @db.Uuid
+  deletedById        String?    @map("deleted_by") @db.Uuid
+  deletedAt          DateTime?  @map("deleted_at") @db.Timestamptz(6)
+  createdAt          DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
+  substation         Substation @relation("SubstationTransformers", fields: [substationId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  createdBy          User?      @relation("TransformerCreatedBy", fields: [createdById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  updatedBy          User?      @relation("TransformerUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  deletedBy          User?      @relation("TransformerDeletedBy", fields: [deletedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@unique([substationId, transformerCode], map: "uq_transformers_substation_id_transformer_code")
+  @@index([substationId], map: "idx_transformers_substation_id")
+  @@index([capacityMva], map: "idx_transformers_capacity_mva")
+  @@index([isActive], map: "idx_transformers_is_active")
+  @@index([deletedAt], map: "idx_transformers_deleted_at")
+  @@index([createdById], map: "idx_transformers_created_by")
+  @@index([updatedById], map: "idx_transformers_updated_by")
+  @@index([deletedById], map: "idx_transformers_deleted_by")
+  @@map("transformers")
+}
+
+model OutgoingFeeder {
+  id              String     @id @default(uuid()) @db.Uuid
+  substationId    String     @map("substation_id") @db.Uuid
+  feederName      String     @map("feeder_name") @db.VarChar(150)
+  feederCode      String?    @map("feeder_code") @db.VarChar(100)
+  voltageLevelKv  Decimal    @map("voltage_level_kv") @db.Decimal(8, 2)
+  feederType      String?    @map("feeder_type") @db.VarChar(50)
+  connectedLoadMw Decimal?   @map("connected_load_mw") @db.Decimal(10, 2)
+  isActive        Boolean    @default(true) @map("is_active")
+  createdById     String?    @map("created_by") @db.Uuid
+  updatedById     String?    @map("updated_by") @db.Uuid
+  deletedById     String?    @map("deleted_by") @db.Uuid
+  deletedAt       DateTime?  @map("deleted_at") @db.Timestamptz(6)
+  createdAt       DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
+  substation      Substation @relation("SubstationOutgoingFeeders", fields: [substationId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  createdBy       User?      @relation("OutgoingFeederCreatedBy", fields: [createdById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  updatedBy       User?      @relation("OutgoingFeederUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  deletedBy       User?      @relation("OutgoingFeederDeletedBy", fields: [deletedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@unique([substationId, feederName], map: "uq_outgoing_feeders_substation_id_feeder_name")
+  @@unique([substationId, feederCode], map: "uq_outgoing_feeders_substation_id_feeder_code")
+  @@index([substationId], map: "idx_outgoing_feeders_substation_id")
+  @@index([voltageLevelKv], map: "idx_outgoing_feeders_voltage_level_kv")
+  @@index([isActive], map: "idx_outgoing_feeders_is_active")
+  @@index([deletedAt], map: "idx_outgoing_feeders_deleted_at")
+  @@index([createdById], map: "idx_outgoing_feeders_created_by")
+  @@index([updatedById], map: "idx_outgoing_feeders_updated_by")
+  @@index([deletedById], map: "idx_outgoing_feeders_deleted_by")
+  @@map("outgoing_feeders")
+}
+
+model LightningArrester {
+  id                  String     @id @default(uuid()) @db.Uuid
+  substationId        String     @map("substation_id") @db.Uuid
+  arresterCode        String     @map("arrester_code") @db.VarChar(100)
+  locationDescription String?    @map("location_description") @db.VarChar(255)
+  voltageRatingKv     Decimal    @map("voltage_rating_kv") @db.Decimal(8, 2)
+  make                String?    @db.VarChar(150)
+  serialNumber        String?    @unique @map("serial_number") @db.VarChar(150)
+  installationDate    DateTime?  @map("installation_date") @db.Date
+  isActive            Boolean    @default(true) @map("is_active")
+  createdById         String?    @map("created_by") @db.Uuid
+  updatedById         String?    @map("updated_by") @db.Uuid
+  deletedById         String?    @map("deleted_by") @db.Uuid
+  deletedAt           DateTime?  @map("deleted_at") @db.Timestamptz(6)
+  createdAt           DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
+  substation          Substation @relation("SubstationLightningArresters", fields: [substationId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  createdBy           User?      @relation("LightningArresterCreatedBy", fields: [createdById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  updatedBy           User?      @relation("LightningArresterUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  deletedBy           User?      @relation("LightningArresterDeletedBy", fields: [deletedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@unique([substationId, arresterCode], map: "uq_lightning_arresters_substation_id_arrester_code")
+  @@index([substationId], map: "idx_lightning_arresters_substation_id")
+  @@index([voltageRatingKv], map: "idx_lightning_arresters_voltage_rating_kv")
+  @@index([isActive], map: "idx_lightning_arresters_is_active")
+  @@index([deletedAt], map: "idx_lightning_arresters_deleted_at")
+  @@index([createdById], map: "idx_lightning_arresters_created_by")
+  @@index([updatedById], map: "idx_lightning_arresters_updated_by")
+  @@index([deletedById], map: "idx_lightning_arresters_deleted_by")
+  @@map("lightning_arresters")
+}
+
+model BatteryBank {
+  id               String     @id @default(uuid()) @db.Uuid
+  substationId     String     @map("substation_id") @db.Uuid
+  batteryBankCode  String     @map("battery_bank_code") @db.VarChar(100)
+  batteryType      String?    @map("battery_type") @db.VarChar(100)
+  voltageV         Decimal    @map("voltage_v") @db.Decimal(8, 2)
+  capacityAh       Decimal    @map("capacity_ah") @db.Decimal(10, 2)
+  cellCount        Int?       @map("cell_count")
+  make             String?    @db.VarChar(150)
+  installationDate DateTime?  @map("installation_date") @db.Date
+  isActive         Boolean    @default(true) @map("is_active")
+  createdById      String?    @map("created_by") @db.Uuid
+  updatedById      String?    @map("updated_by") @db.Uuid
+  deletedById      String?    @map("deleted_by") @db.Uuid
+  deletedAt        DateTime?  @map("deleted_at") @db.Timestamptz(6)
+  createdAt        DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
+  substation       Substation @relation("SubstationBatteryBanks", fields: [substationId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  createdBy        User?      @relation("BatteryBankCreatedBy", fields: [createdById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  updatedBy        User?      @relation("BatteryBankUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  deletedBy        User?      @relation("BatteryBankDeletedBy", fields: [deletedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@unique([substationId, batteryBankCode], map: "uq_battery_banks_substation_id_battery_bank_code")
+  @@index([substationId], map: "idx_battery_banks_substation_id")
+  @@index([voltageV], map: "idx_battery_banks_voltage_v")
+  @@index([isActive], map: "idx_battery_banks_is_active")
+  @@index([deletedAt], map: "idx_battery_banks_deleted_at")
+  @@index([createdById], map: "idx_battery_banks_created_by")
+  @@index([updatedById], map: "idx_battery_banks_updated_by")
+  @@index([deletedById], map: "idx_battery_banks_deleted_by")
+  @@map("battery_banks")
+}
+
+model CapacitorBank {
+  id                String     @id @default(uuid()) @db.Uuid
+  substationId      String     @map("substation_id") @db.Uuid
+  capacitorBankCode String     @map("capacitor_bank_code") @db.VarChar(100)
+  capacityMvar      Decimal    @map("capacity_mvar") @db.Decimal(10, 2)
+  voltageLevelKv    Decimal    @map("voltage_level_kv") @db.Decimal(8, 2)
+  stepsCount        Int?       @map("steps_count")
+  make              String?    @db.VarChar(150)
+  installationDate  DateTime?  @map("installation_date") @db.Date
+  isActive          Boolean    @default(true) @map("is_active")
+  createdById       String?    @map("created_by") @db.Uuid
+  updatedById       String?    @map("updated_by") @db.Uuid
+  deletedById       String?    @map("deleted_by") @db.Uuid
+  deletedAt         DateTime?  @map("deleted_at") @db.Timestamptz(6)
+  createdAt         DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
+  substation        Substation @relation("SubstationCapacitorBanks", fields: [substationId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  createdBy         User?      @relation("CapacitorBankCreatedBy", fields: [createdById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  updatedBy         User?      @relation("CapacitorBankUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  deletedBy         User?      @relation("CapacitorBankDeletedBy", fields: [deletedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@unique([substationId, capacitorBankCode], map: "uq_capacitor_banks_substation_id_capacitor_bank_code")
+  @@index([substationId], map: "idx_capacitor_banks_substation_id")
+  @@index([capacityMvar], map: "idx_capacitor_banks_capacity_mvar")
+  @@index([voltageLevelKv], map: "idx_capacitor_banks_voltage_level_kv")
+  @@index([isActive], map: "idx_capacitor_banks_is_active")
+  @@index([deletedAt], map: "idx_capacitor_banks_deleted_at")
+  @@index([createdById], map: "idx_capacitor_banks_created_by")
+  @@index([updatedById], map: "idx_capacitor_banks_updated_by")
+  @@index([deletedById], map: "idx_capacitor_banks_deleted_by")
+  @@map("capacitor_banks")
+}
+
+model UploadedFile {
+  id               String      @id @default(uuid()) @db.Uuid
+  originalFileName String      @map("original_file_name") @db.VarChar(255)
+  storedFileName   String      @map("stored_file_name") @db.VarChar(255)
+  storagePath      String      @map("storage_path")
+  mimeType         String      @map("mime_type") @db.VarChar(150)
+  fileSizeBytes    BigInt      @map("file_size_bytes")
+  checksum         String      @db.VarChar(128)
+  uploadedById     String      @map("uploaded_by") @db.Uuid
+  deletedById      String?     @map("deleted_by") @db.Uuid
+  deletedAt        DateTime?   @map("deleted_at") @db.Timestamptz(6)
+  createdAt        DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime    @updatedAt @map("updated_at") @db.Timestamptz(6)
+  uploadedBy       User        @relation("UploadedFilesUploadedBy", fields: [uploadedById], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  deletedBy        User?       @relation("UploadedFilesDeletedBy", fields: [deletedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  importJobs       ImportJob[] @relation("UploadedFileImportJobs")
+
+  @@index([uploadedById], map: "idx_uploaded_files_uploaded_by")
+  @@index([deletedById], map: "idx_uploaded_files_deleted_by")
+  @@index([checksum], map: "idx_uploaded_files_checksum")
+  @@index([createdAt], map: "idx_uploaded_files_created_at")
+  @@index([deletedAt], map: "idx_uploaded_files_deleted_at")
+  @@map("uploaded_files")
+}
+
+model ImportJob {
+  id             String          @id @default(uuid()) @db.Uuid
+  uploadedFileId String          @map("uploaded_file_id") @db.Uuid
+  importType     ImportType      @map("import_type")
+  status         ImportJobStatus @default(PENDING)
+  totalRows      Int             @default(0) @map("total_rows")
+  successRows    Int             @default(0) @map("success_rows")
+  failedRows     Int             @default(0) @map("failed_rows")
+  startedAt      DateTime?       @map("started_at") @db.Timestamptz(6)
+  completedAt    DateTime?       @map("completed_at") @db.Timestamptz(6)
+  createdById    String          @map("created_by") @db.Uuid
+  updatedById    String?         @map("updated_by") @db.Uuid
+  createdAt      DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime        @updatedAt @map("updated_at") @db.Timestamptz(6)
+  uploadedFile   UploadedFile    @relation("UploadedFileImportJobs", fields: [uploadedFileId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  createdBy      User            @relation("ImportJobsCreatedBy", fields: [createdById], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  updatedBy      User?           @relation("ImportJobsUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  errors         ImportError[]   @relation("ImportJobErrors")
+
+  @@index([uploadedFileId], map: "idx_import_jobs_uploaded_file_id")
+  @@index([status], map: "idx_import_jobs_status")
+  @@index([importType], map: "idx_import_jobs_import_type")
+  @@index([createdById], map: "idx_import_jobs_created_by")
+  @@index([updatedById], map: "idx_import_jobs_updated_by")
+  @@index([createdAt], map: "idx_import_jobs_created_at")
+  @@map("import_jobs")
+}
+
+model ImportError {
+  id           String    @id @default(uuid()) @db.Uuid
+  importJobId  String    @map("import_job_id") @db.Uuid
+  sheetName    String?   @map("sheet_name") @db.VarChar(150)
+  rowNumber    Int       @map("row_number")
+  columnName   String?   @map("column_name") @db.VarChar(150)
+  fieldName    String?   @map("field_name") @db.VarChar(150)
+  rawValue     String?   @map("raw_value")
+  errorCode    String    @map("error_code") @db.VarChar(100)
+  errorMessage String    @map("error_message")
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  importJob    ImportJob @relation("ImportJobErrors", fields: [importJobId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@index([importJobId], map: "idx_import_errors_import_job_id")
+  @@index([importJobId, rowNumber], map: "idx_import_errors_import_job_id_row_number")
+  @@index([errorCode], map: "idx_import_errors_error_code")
+  @@map("import_errors")
+}
+
+// SQL migration constraints Prisma cannot represent directly:
+// 1. user_area_mappings must have exactly one populated area FK.
+//    CHECK (
+//      num_nonnulls(discom_id, zone_id, vertical_id, sub_vertical_id, substation_id) = 1
+//    )
+// 2. user_area_mappings.area_type must match the populated area FK.
+//    CHECK (
+//      (area_type = 'DISCOM' AND discom_id IS NOT NULL AND zone_id IS NULL AND vertical_id IS NULL AND sub_vertical_id IS NULL AND substation_id IS NULL)
+//      OR (area_type = 'ZONE' AND zone_id IS NOT NULL AND discom_id IS NULL AND vertical_id IS NULL AND sub_vertical_id IS NULL AND substation_id IS NULL)
+//      OR (area_type = 'VERTICAL' AND vertical_id IS NOT NULL AND discom_id IS NULL AND zone_id IS NULL AND sub_vertical_id IS NULL AND substation_id IS NULL)
+//      OR (area_type = 'SUB_VERTICAL' AND sub_vertical_id IS NOT NULL AND discom_id IS NULL AND zone_id IS NULL AND vertical_id IS NULL AND substation_id IS NULL)
+//      OR (area_type = 'SUBSTATION' AND substation_id IS NOT NULL AND discom_id IS NULL AND zone_id IS NULL AND vertical_id IS NULL AND sub_vertical_id IS NULL)
+//    )
+// 3. users must not report to themselves.
+//    CHECK (parent_user_id IS NULL OR parent_user_id <> id)
+// 4. import row counts must not be negative.
+//    CHECK (total_rows >= 0 AND success_rows >= 0 AND failed_rows >= 0)
+// 5. Optional partial unique indexes for one active primary mapping per user:
+//    CREATE UNIQUE INDEX uq_user_area_mappings_one_primary_active_user
+//    ON user_area_mappings (user_id)
+//    WHERE is_primary = true AND is_active = true AND deleted_at IS NULL;
+// 6. Optional partial unique indexes for one active battery/capacitor bank per substation if the business later requires it:
+//    CREATE UNIQUE INDEX uq_battery_banks_one_active_per_substation
+//    ON battery_banks (substation_id)
+//    WHERE is_active = true AND deleted_at IS NULL;
+//    CREATE UNIQUE INDEX uq_capacitor_banks_one_active_per_substation
+//    ON capacitor_banks (substation_id)
+//    WHERE is_active = true AND deleted_at IS NULL;
