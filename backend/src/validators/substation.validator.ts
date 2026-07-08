@@ -66,6 +66,30 @@ export const updateSubstationBodySchema = z
     "At least one field must be provided"
   );
 
+export const listSubstationsQuerySchema = z.object({
+  page: z.coerce.number().int().positive().default(1),
+  limit: z.coerce.number().int().positive().max(100).default(20),
+  search: z.string().trim().optional(),
+  sortBy: z
+    .enum(["name", "code", "createdAt", "updatedAt", "commissioningDate", "voltageLevelKv"])
+    .default("createdAt"),
+  sortOrder: z.enum(["asc", "desc"]).default("desc"),
+  subVerticalId: z.string().uuid().optional(),
+  verticalId: z.string().uuid().optional(),
+  zoneId: z.string().uuid().optional(),
+  discomId: z.string().uuid().optional(),
+  voltageLevelKv: decimalNumber("voltageLevelKv").positive("voltageLevelKv must be greater than 0").optional(),
+  isActive: z
+    .enum(["true", "false"])
+    .transform((value) => value === "true")
+    .optional(),
+  includeDeleted: z
+    .enum(["true", "false"])
+    .transform((value) => value === "true")
+    .default("false")
+});
+
 export type SubstationIdParams = z.infer<typeof substationIdParamsSchema>;
 export type CreateSubstationBody = z.infer<typeof createSubstationBodySchema>;
 export type UpdateSubstationBody = z.infer<typeof updateSubstationBodySchema>;
+export type ListSubstationsQuery = z.infer<typeof listSubstationsQuerySchema>;

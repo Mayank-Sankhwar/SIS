@@ -1,11 +1,68 @@
-import { Prisma } from "@prisma/client";
+import { Prisma, type AreaType } from "@prisma/client";
 import { prisma } from "../config/prisma.js";
 import type {
   CreateSubstationBody,
+  ListSubstationsQuery,
   UpdateSubstationBody
 } from "../validators/substation.validator.js";
 
 export type PrismaTx = Prisma.TransactionClient;
+
+interface UserAreaAssignment {
+  areaType: AreaType;
+  discomId: string | null;
+  zoneId: string | null;
+  verticalId: string | null;
+  subVerticalId: string | null;
+  substationId: string | null;
+}
+
+interface ListSubstationsAccess {
+  userId: string;
+  role: string;
+}
+
+const substationListSelect = {
+  id: true,
+  name: true,
+  code: true,
+  voltageLevelKv: true,
+  address: true,
+  latitude: true,
+  longitude: true,
+  commissioningDate: true,
+  isActive: true,
+  createdAt: true,
+  updatedAt: true,
+  subVertical: {
+    select: {
+      id: true,
+      name: true,
+      code: true,
+      vertical: {
+        select: {
+          id: true,
+          name: true,
+          code: true,
+          zone: {
+            select: {
+              id: true,
+              name: true,
+              code: true,
+              discom: {
+                select: {
+                  id: true,
+                  name: true,
+                  code: true
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+} satisfies Prisma.SubstationSelect;
 
 const substationDetailSelect = {
   id: true,
@@ -104,7 +161,19 @@ export class SubstationRepository {
         id: true,
         name: true,
         code: true,
-        verticalId: true
+        verticalId: true,
+        vertical: {
+          select: {
+            id: true,
+            zoneId: true,
+            zone: {
+              select: {
+                id: true,
+                discomId: true
+              }
+            }
+          }
+        }
       }
     });
   }
@@ -125,6 +194,29 @@ export class SubstationRepository {
           ...(input.name ? [{ name: { equals: input.name, mode: Prisma.QueryMode.insensitive } }] : []),
           ...(input.code ? [{ code: { equals: input.code, mode: Prisma.QueryMode.insensitive } }] : [])
         ]
+      },
+      select: {
+        id: true,
+        name: true,
+        code: true
+      }
+    });
+  }
+
+  findDuplicateCoordinates(
+    tx: PrismaTx,
+    input: { latitude?: number; longitude?: number; excludeId?: string }
+  ) {
+    if (input.latitude === undefined || input.longitude === undefined) {
+      return null;
+    }
+
+    return tx.substation.findFirst({
+      where: {
+        latitude: input.latitude,
+        longitude: input.longitude,
+        deletedAt: null,
+        ...(input.excludeId ? { id: { not: input.excludeId } } : {})
       },
       select: {
         id: true,
@@ -171,6 +263,8 @@ export class SubstationRepository {
         subVerticalId: true,
         name: true,
         code: true,
+        latitude: true,
+        longitude: true,
         deletedAt: true
       }
     });
@@ -192,5 +286,158 @@ export class SubstationRepository {
       },
       select: substationDetailSelect
     });
+  }
+
+  async list(query: ListSubstationsQuery, access: ListSubstationsAccess) {
+    const where = await this.buildListWhere(query, access);
+    const skip = (query.page - 1) * query.limit;
+
+    const [items, total] = await Promise.all([
+      prisma.substation.findMany({
+        where,
+        select: substationListSelect,
+        orderBy: {
+          [query.sortBy]: query.sortOrder
+        },
+        skip,
+        take: query.limit
+      }),
+      prisma.substation.count({ where })
+    ]);
+
+    return { items, total };
+  }
+
+  async countEquipment(tx: PrismaTx, substationId: string) {
+    const [
+      incomingSources,
+      transformers,
+      outgoingFeeders,
+      lightningArresters,
+      batteryBanks,
+      capacitorBanks
+    ] = await Promise.all([
+      tx.incomingSource.count({ where: { substationId, deletedAt: null } }),
+      tx.transformer.count({ where: { substationId, deletedAt: null } }),
+      tx.outgoingFeeder.count({ where: { substationId, deletedAt: null } }),
+      tx.lightningArrester.count({ where: { substationId, deletedAt: null } }),
+      tx.batteryBank.count({ where: { substationId, deletedAt: null } }),
+      tx.capacitorBank.count({ where: { substationId, deletedAt: null } })
+    ]);
+
+    return {
+      incomingSources,
+      transformers,
+      outgoingFeeders,
+      lightningArresters,
+      batteryBanks,
+      capacitorBanks
+    };
+  }
+
+  softDelete(tx: PrismaTx, id: string, deletedById: string) {
+    return tx.substation.update({
+      where: { id },
+      data: {
+        isActive: false,
+        deletedAt: new Date(),
+        deletedById,
+        updatedById: deletedById
+      },
+      select: substationDetailSelect
+    });
+  }
+
+  private async buildListWhere(query: ListSubstationsQuery, access: ListSubstationsAccess) {
+    const filters: Prisma.SubstationWhereInput[] = [];
+
+    if (!query.includeDeleted) {
+      filters.push({ deletedAt: null });
+    }
+
+    if (query.search) {
+      filters.push({
+        OR: [
+          { name: { contains: query.search, mode: Prisma.QueryMode.insensitive } },
+          { code: { contains: query.search, mode: Prisma.QueryMode.insensitive } },
+          { address: { contains: query.search, mode: Prisma.QueryMode.insensitive } }
+        ]
+      });
+    }
+
+    if (query.subVerticalId) {
+      filters.push({ subVerticalId: query.subVerticalId });
+    }
+
+    if (query.verticalId) {
+      filters.push({ subVertical: { verticalId: query.verticalId } });
+    }
+
+    if (query.zoneId) {
+      filters.push({ subVertical: { vertical: { zoneId: query.zoneId } } });
+    }
+
+    if (query.discomId) {
+      filters.push({ subVertical: { vertical: { zone: { discomId: query.discomId } } } });
+    }
+
+    if (query.voltageLevelKv !== undefined) {
+      filters.push({ voltageLevelKv: query.voltageLevelKv });
+    }
+
+    if (query.isActive !== undefined) {
+      filters.push({ isActive: query.isActive });
+    }
+
+    if (access.role !== "ADMIN") {
+      const accessFilters = await this.buildAreaAccessFilters(access.userId);
+      filters.push(accessFilters.length > 0 ? { OR: accessFilters } : { id: "__no_assigned_area__" });
+    }
+
+    return filters.length > 0 ? { AND: filters } : {};
+  }
+
+  private async buildAreaAccessFilters(userId: string): Promise<Prisma.SubstationWhereInput[]> {
+    const assignments = await prisma.userAreaMapping.findMany({
+      where: {
+        userId,
+        isActive: true,
+        deletedAt: null
+      },
+      select: {
+        areaType: true,
+        discomId: true,
+        zoneId: true,
+        verticalId: true,
+        subVerticalId: true,
+        substationId: true
+      }
+    });
+
+    return assignments.flatMap((assignment) => this.toSubstationScope(assignment));
+  }
+
+  private toSubstationScope(assignment: UserAreaAssignment): Prisma.SubstationWhereInput[] {
+    if (assignment.areaType === "DISCOM" && assignment.discomId) {
+      return [{ subVertical: { vertical: { zone: { discomId: assignment.discomId } } } }];
+    }
+
+    if (assignment.areaType === "ZONE" && assignment.zoneId) {
+      return [{ subVertical: { vertical: { zoneId: assignment.zoneId } } }];
+    }
+
+    if (assignment.areaType === "VERTICAL" && assignment.verticalId) {
+      return [{ subVertical: { verticalId: assignment.verticalId } }];
+    }
+
+    if (assignment.areaType === "SUB_VERTICAL" && assignment.subVerticalId) {
+      return [{ subVerticalId: assignment.subVerticalId }];
+    }
+
+    if (assignment.areaType === "SUBSTATION" && assignment.substationId) {
+      return [{ id: assignment.substationId }];
+    }
+
+    return [];
   }
 }

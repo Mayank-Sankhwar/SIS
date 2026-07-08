@@ -1,0 +1,173 @@
+{
+  "info": {
+    "name": "Substation Phase 3 Business Rules",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api/v1"
+    },
+    {
+      "key": "adminToken",
+      "value": ""
+    },
+    {
+      "key": "eeToken",
+      "value": ""
+    },
+    {
+      "key": "aeToken",
+      "value": ""
+    },
+    {
+      "key": "jeToken",
+      "value": ""
+    },
+    {
+      "key": "substationId",
+      "value": ""
+    },
+    {
+      "key": "subVerticalId",
+      "value": ""
+    },
+    {
+      "key": "outsideSubVerticalId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "JE Cannot Create Substation",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jeToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/substations",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"subVerticalId\": \"{{subVerticalId}}\",\n  \"name\": \"JE Blocked Substation\",\n  \"code\": \"JE-BLOCKED-01\",\n  \"voltageLevelKv\": 33\n}"
+        }
+      }
+    },
+    {
+      "name": "EE Cannot Create Outside Assigned Area",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{eeToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/substations",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"subVerticalId\": \"{{outsideSubVerticalId}}\",\n  \"name\": \"Outside Area Substation\",\n  \"code\": \"OUTSIDE-AREA-01\",\n  \"voltageLevelKv\": 33\n}"
+        }
+      }
+    },
+    {
+      "name": "Reject Client Supplied Audit Fields",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/substations/{{substationId}}",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Audit Field Attack\",\n  \"createdById\": \"00000000-0000-0000-0000-000000000000\",\n  \"updatedById\": \"00000000-0000-0000-0000-000000000000\",\n  \"deletedById\": \"00000000-0000-0000-0000-000000000000\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Duplicate Code Conflict",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/substations",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"subVerticalId\": \"{{subVerticalId}}\",\n  \"name\": \"Duplicate Code Probe\",\n  \"code\": \"EXISTING-CODE-HERE\",\n  \"voltageLevelKv\": 33\n}"
+        }
+      }
+    },
+    {
+      "name": "Duplicate GIS Coordinates Conflict",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/substations",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"subVerticalId\": \"{{subVerticalId}}\",\n  \"name\": \"Duplicate Coordinates Probe\",\n  \"code\": \"DUP-GIS-01\",\n  \"voltageLevelKv\": 33,\n  \"latitude\": 23.259933,\n  \"longitude\": 77.412613\n}"
+        }
+      }
+    },
+    {
+      "name": "JE Can List Only Assigned Area",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jeToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/substations?page=1&limit=20"
+      }
+    },
+    {
+      "name": "Soft Delete Blocked When Equipment Exists",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/substations/{{substationId}}"
+      }
+    }
+  ]
+}

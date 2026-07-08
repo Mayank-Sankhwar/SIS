@@ -1,0 +1,266 @@
+{
+  "info": {
+    "name": "Incoming Source CRUD",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api/v1"
+    },
+    {
+      "key": "adminToken",
+      "value": ""
+    },
+    {
+      "key": "eeToken",
+      "value": ""
+    },
+    {
+      "key": "aeToken",
+      "value": ""
+    },
+    {
+      "key": "jeToken",
+      "value": ""
+    },
+    {
+      "key": "substationId",
+      "value": ""
+    },
+    {
+      "key": "outsideSubstationId",
+      "value": ""
+    },
+    {
+      "key": "incomingSourceId",
+      "value": ""
+    },
+    {
+      "key": "deletedIncomingSourceId",
+      "value": ""
+    },
+    {
+      "key": "discomId",
+      "value": ""
+    },
+    {
+      "key": "zoneId",
+      "value": ""
+    },
+    {
+      "key": "verticalId",
+      "value": ""
+    },
+    {
+      "key": "subVerticalId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Create",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/incoming-sources",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"substationId\": \"{{substationId}}\",\n  \"sourceName\": \"Postman Incoming Source\",\n  \"sourceType\": \"GRID\",\n  \"voltageLevelKv\": 132,\n  \"feederName\": \"PM-FDR-001\",\n  \"meterNumber\": \"PM-MTR-001\",\n  \"isActive\": true\n}"
+        }
+      }
+    },
+    {
+      "name": "Get",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/incoming-sources/{{incomingSourceId}}"
+      }
+    },
+    {
+      "name": "List",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/incoming-sources"
+      }
+    },
+    {
+      "name": "Search",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/incoming-sources?search=Postman"
+      }
+    },
+    {
+      "name": "Pagination",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/incoming-sources?page=1&limit=10&sortBy=sourceName&sortOrder=asc"
+      }
+    },
+    {
+      "name": "Update",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/incoming-sources/{{incomingSourceId}}",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"sourceType\": \"INTERCONNECTOR\",\n  \"voltageLevelKv\": 33,\n  \"feederName\": \"PM-FDR-001-UPD\",\n  \"meterNumber\": \"PM-MTR-001-UPD\",\n  \"isActive\": true\n}"
+        }
+      }
+    },
+    {
+      "name": "Delete",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/incoming-sources/{{incomingSourceId}}"
+      }
+    },
+    {
+      "name": "Unauthorized",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/incoming-sources"
+      }
+    },
+    {
+      "name": "Forbidden - JE Create",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jeToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/incoming-sources",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"substationId\": \"{{substationId}}\",\n  \"sourceName\": \"JE Forbidden Source\",\n  \"voltageLevelKv\": 33\n}"
+        }
+      }
+    },
+    {
+      "name": "Forbidden - Outside Area",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{eeToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/incoming-sources",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"substationId\": \"{{outsideSubstationId}}\",\n  \"sourceName\": \"Outside Area Source\",\n  \"voltageLevelKv\": 33\n}"
+        }
+      }
+    },
+    {
+      "name": "Duplicate",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/incoming-sources",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"substationId\": \"{{substationId}}\",\n  \"sourceName\": \"Postman Incoming Source\",\n  \"sourceType\": \"GRID\",\n  \"voltageLevelKv\": 132\n}"
+        }
+      }
+    },
+    {
+      "name": "Soft Delete Retrieval",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/incoming-sources/{{deletedIncomingSourceId}}"
+      }
+    },
+    {
+      "name": "List Include Deleted",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/incoming-sources?includeDeleted=true"
+      }
+    }
+  ]
+}

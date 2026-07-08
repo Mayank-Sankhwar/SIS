@@ -1,34 +1,28 @@
 import { RoleName } from "@prisma/client";
 import type { RequestHandler } from "express";
 import { Router } from "express";
-import { SubstationController } from "../controllers/substation.controller.js";
+import { BatteryBankController } from "../controllers/battery-bank.controller.js";
 import { authenticate, authorizeRoles, checkAreaAccess } from "../middlewares/auth.middleware.js";
 import { validateBody, validateParams, validateQuery } from "../middlewares/validate.middleware.js";
 import { asyncHandler } from "../utils/async-handler.js";
 import {
-  createSubstationBodySchema,
-  listSubstationsQuerySchema,
-  substationIdParamsSchema,
-  updateSubstationBodySchema
-} from "../validators/substation.validator.js";
+  batteryBankIdParamsSchema,
+  createBatteryBankBodySchema,
+  listBatteryBanksQuerySchema,
+  updateBatteryBankBodySchema
+} from "../validators/battery-bank.validator.js";
 
 const router = Router();
-const substationController = new SubstationController();
-
-const exposeIdAsSubstationId: RequestHandler = (req, _res, next) => {
-  const { id } = req.params;
-
-  if (id) {
-    req.params.substationId = id;
-  }
-
-  next();
-};
+const batteryBankController = new BatteryBankController();
 
 const explicitListAreaAccess = checkAreaAccess();
 const checkExplicitListAreaAccess: RequestHandler = (req, res, next) => {
   const hasAreaFilter = Boolean(
-    req.query.discomId || req.query.zoneId || req.query.verticalId || req.query.subVerticalId
+    req.query.discomId ||
+      req.query.zoneId ||
+      req.query.verticalId ||
+      req.query.subVerticalId ||
+      req.query.substationId
   );
 
   if (!hasAreaFilter) {
@@ -41,10 +35,10 @@ const checkExplicitListAreaAccess: RequestHandler = (req, res, next) => {
 
 /**
  * @openapi
- * /api/v1/substations:
+ * /api/v1/battery-banks:
  *   post:
- *     summary: Create a Substation
- *     tags: [Substations]
+ *     summary: Create a Battery Bank
+ *     tags: [Battery Banks]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -53,42 +47,42 @@ const checkExplicitListAreaAccess: RequestHandler = (req, res, next) => {
  *         application/json:
  *           schema:
  *             type: object
- *             required: [subVerticalId, name, code, voltageLevelKv]
+ *             required: [substationId, batteryBankCode, voltageV, capacityAh]
  *             properties:
- *               subVerticalId:
+ *               substationId:
  *                 type: string
  *                 format: uuid
- *               name:
+ *               batteryBankCode:
  *                 type: string
- *                 example: Central 33/11 KV Substation
- *               code:
+ *                 example: BB-GOV-01
+ *               batteryType:
  *                 type: string
- *                 example: SS-CENTRAL-01
- *               voltageLevelKv:
+ *                 example: VRLA
+ *               voltageV:
  *                 type: number
- *                 example: 33
- *               address:
+ *                 example: 220
+ *               capacityAh:
+ *                 type: number
+ *                 example: 300
+ *               cellCount:
+ *                 type: integer
+ *                 minimum: 0
+ *                 example: 110
+ *               make:
  *                 type: string
- *               latitude:
- *                 type: number
- *                 minimum: -90
- *                 maximum: 90
- *               longitude:
- *                 type: number
- *                 minimum: -180
- *                 maximum: 180
- *               commissioningDate:
+ *                 example: Exide
+ *               installationDate:
  *                 type: string
  *                 format: date
  *               isActive:
  *                 type: boolean
  *     responses:
  *       201:
- *         description: Substation created successfully
+ *         description: Battery Bank created successfully
  *       403:
  *         description: Role or area access denied
  *       409:
- *         description: Duplicate name or code within this SubVertical
+ *         description: Duplicate battery bank code within this Substation
  *       422:
  *         description: Validation failed or parent hierarchy is inactive/deleted
  */
@@ -96,17 +90,17 @@ router.post(
   "/",
   authenticate,
   authorizeRoles(RoleName.ADMIN, RoleName.EE, RoleName.AE),
-  validateBody(createSubstationBodySchema),
+  validateBody(createBatteryBankBodySchema),
   checkAreaAccess(),
-  asyncHandler(substationController.create)
+  asyncHandler(batteryBankController.create)
 );
 
 /**
  * @openapi
- * /api/v1/substations:
+ * /api/v1/battery-banks:
  *   get:
- *     summary: List Substations
- *     tags: [Substations]
+ *     summary: List Battery Banks
+ *     tags: [Battery Banks]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -128,12 +122,17 @@ router.post(
  *         name: sortBy
  *         schema:
  *           type: string
- *           enum: [name, code, createdAt, updatedAt, commissioningDate, voltageLevelKv]
+ *           enum: [batteryBankCode, batteryType, voltageV, capacityAh, cellCount, make, installationDate, isActive, createdAt, updatedAt]
  *       - in: query
  *         name: sortOrder
  *         schema:
  *           type: string
  *           enum: [asc, desc]
+ *       - in: query
+ *         name: substationId
+ *         schema:
+ *           type: string
+ *           format: uuid
  *       - in: query
  *         name: subVerticalId
  *         schema:
@@ -155,9 +154,17 @@ router.post(
  *           type: string
  *           format: uuid
  *       - in: query
- *         name: voltageLevelKv
+ *         name: voltageV
  *         schema:
  *           type: number
+ *       - in: query
+ *         name: capacityAh
+ *         schema:
+ *           type: number
+ *       - in: query
+ *         name: batteryType
+ *         schema:
+ *           type: string
  *       - in: query
  *         name: isActive
  *         schema:
@@ -169,7 +176,7 @@ router.post(
  *           default: false
  *     responses:
  *       200:
- *         description: Substations fetched successfully
+ *         description: Battery Banks fetched successfully
  *       403:
  *         description: Role or area access denied
  *       422:
@@ -179,17 +186,17 @@ router.get(
   "/",
   authenticate,
   authorizeRoles(RoleName.ADMIN, RoleName.EE, RoleName.AE, RoleName.JE),
-  validateQuery(listSubstationsQuerySchema),
+  validateQuery(listBatteryBanksQuerySchema),
   checkExplicitListAreaAccess,
-  asyncHandler(substationController.list)
+  asyncHandler(batteryBankController.list)
 );
 
 /**
  * @openapi
- * /api/v1/substations/{id}:
+ * /api/v1/battery-banks/{id}:
  *   get:
- *     summary: Get Substation by ID
- *     tags: [Substations]
+ *     summary: Get Battery Bank by ID
+ *     tags: [Battery Banks]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -201,28 +208,26 @@ router.get(
  *           format: uuid
  *     responses:
  *       200:
- *         description: Substation fetched successfully
+ *         description: Battery Bank fetched successfully
  *       403:
  *         description: Role or area access denied
  *       404:
- *         description: Substation not found
+ *         description: Battery Bank not found
  */
 router.get(
   "/:id",
   authenticate,
   authorizeRoles(RoleName.ADMIN, RoleName.EE, RoleName.AE, RoleName.JE),
-  validateParams(substationIdParamsSchema),
-  exposeIdAsSubstationId,
-  checkAreaAccess(),
-  asyncHandler(substationController.getById)
+  validateParams(batteryBankIdParamsSchema),
+  asyncHandler(batteryBankController.getById)
 );
 
 /**
  * @openapi
- * /api/v1/substations/{id}:
+ * /api/v1/battery-banks/{id}:
  *   patch:
- *     summary: Update Substation
- *     tags: [Substations]
+ *     summary: Update Battery Bank
+ *     tags: [Battery Banks]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -239,36 +244,31 @@ router.get(
  *           schema:
  *             type: object
  *             properties:
- *               name:
+ *               batteryType:
  *                 type: string
- *               code:
+ *               voltageV:
+ *                 type: number
+ *               capacityAh:
+ *                 type: number
+ *               cellCount:
+ *                 type: integer
+ *                 minimum: 0
+ *               make:
  *                 type: string
- *               voltageLevelKv:
- *                 type: number
- *               address:
- *                 type: string
- *               latitude:
- *                 type: number
- *                 minimum: -90
- *                 maximum: 90
- *               longitude:
- *                 type: number
- *                 minimum: -180
- *                 maximum: 180
- *               commissioningDate:
+ *               installationDate:
  *                 type: string
  *                 format: date
  *               isActive:
  *                 type: boolean
  *     responses:
  *       200:
- *         description: Substation updated successfully
+ *         description: Battery Bank updated successfully
  *       403:
  *         description: Role or area access denied
  *       404:
- *         description: Substation not found
+ *         description: Battery Bank not found
  *       409:
- *         description: Duplicate or deleted record
+ *         description: Deleted record
  *       422:
  *         description: Validation failed or parent hierarchy is inactive/deleted
  */
@@ -276,19 +276,17 @@ router.patch(
   "/:id",
   authenticate,
   authorizeRoles(RoleName.ADMIN, RoleName.EE, RoleName.AE),
-  validateParams(substationIdParamsSchema),
-  validateBody(updateSubstationBodySchema),
-  exposeIdAsSubstationId,
-  checkAreaAccess(),
-  asyncHandler(substationController.update)
+  validateParams(batteryBankIdParamsSchema),
+  validateBody(updateBatteryBankBodySchema),
+  asyncHandler(batteryBankController.update)
 );
 
 /**
  * @openapi
- * /api/v1/substations/{id}:
+ * /api/v1/battery-banks/{id}:
  *   delete:
- *     summary: Soft delete Substation
- *     tags: [Substations]
+ *     summary: Soft delete Battery Bank
+ *     tags: [Battery Banks]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -300,22 +298,20 @@ router.patch(
  *           format: uuid
  *     responses:
  *       200:
- *         description: Substation deleted successfully
+ *         description: Battery Bank deleted successfully
  *       403:
  *         description: Role or area access denied
  *       404:
- *         description: Substation not found
+ *         description: Battery Bank not found
  *       409:
- *         description: Substation contains equipment or is already deleted
+ *         description: Battery Bank is already deleted
  */
 router.delete(
   "/:id",
   authenticate,
-  authorizeRoles(RoleName.ADMIN),
-  validateParams(substationIdParamsSchema),
-  exposeIdAsSubstationId,
-  checkAreaAccess(),
-  asyncHandler(substationController.softDelete)
+  authorizeRoles(RoleName.ADMIN, RoleName.EE, RoleName.AE),
+  validateParams(batteryBankIdParamsSchema),
+  asyncHandler(batteryBankController.softDelete)
 );
 
-export { router as substationRoutes };
+export { router as batteryBankRoutes };

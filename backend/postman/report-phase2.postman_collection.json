@@ -1,0 +1,243 @@
+{
+  "info": {
+    "name": "Reports Phase 2",
+    "description": "Printable PDF reports plus import history, import errors, and audit log report endpoints. All requests are read-only and reuse bearer-token authorization.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "PDF Reports",
+      "item": [
+        {
+          "name": "Substations PDF",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/reports/substations/pdf?dateFrom={{dateFrom}}&dateTo={{dateTo}}&discomId={{discomId}}&zoneId={{zoneId}}&verticalId={{verticalId}}&subVerticalId={{subVerticalId}}&substationId={{substationId}}"
+          }
+        },
+        {
+          "name": "Transformers PDF",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/reports/transformers/pdf?dateFrom={{dateFrom}}&dateTo={{dateTo}}&discomId={{discomId}}&zoneId={{zoneId}}&verticalId={{verticalId}}&subVerticalId={{subVerticalId}}&substationId={{substationId}}"
+          }
+        },
+        {
+          "name": "Feeders PDF",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/reports/feeders/pdf?dateFrom={{dateFrom}}&dateTo={{dateTo}}&discomId={{discomId}}&zoneId={{zoneId}}&verticalId={{verticalId}}&subVerticalId={{subVerticalId}}&substationId={{substationId}}"
+          }
+        },
+        {
+          "name": "Equipment Summary PDF",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/reports/equipment-summary/pdf?dateFrom={{dateFrom}}&dateTo={{dateTo}}&discomId={{discomId}}&zoneId={{zoneId}}&verticalId={{verticalId}}&subVerticalId={{subVerticalId}}&substationId={{substationId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Import History Report",
+      "item": [
+        {
+          "name": "Import History JSON",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/reports/import-history?format=json&dateFrom={{dateFrom}}&dateTo={{dateTo}}"
+          }
+        },
+        {
+          "name": "Import History XLSX",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/reports/import-history?format=xlsx&dateFrom={{dateFrom}}&dateTo={{dateTo}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Import Error Report",
+      "item": [
+        {
+          "name": "Import Errors JSON",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/reports/import-errors?format=json&dateFrom={{dateFrom}}&dateTo={{dateTo}}"
+          }
+        },
+        {
+          "name": "Import Errors XLSX",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/reports/import-errors?format=xlsx&dateFrom={{dateFrom}}&dateTo={{dateTo}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Audit Log Report",
+      "item": [
+        {
+          "name": "Audit Log JSON",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/reports/audit-log?format=json&dateFrom={{dateFrom}}&dateTo={{dateTo}}"
+          }
+        },
+        {
+          "name": "Audit Log XLSX",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/reports/audit-log?format=xlsx&dateFrom={{dateFrom}}&dateTo={{dateTo}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Security and Validation",
+      "item": [
+        {
+          "name": "Unauthorized PDF",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/reports/substations/pdf"
+          }
+        },
+        {
+          "name": "Restricted Area Data Hidden",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{restrictedToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/reports/substations/pdf?substationId={{outsideAreaSubstationId}}"
+          }
+        },
+        {
+          "name": "Invalid Date Filter",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/reports/import-history?dateFrom=not-a-date"
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "restrictedToken",
+      "value": ""
+    },
+    {
+      "key": "discomId",
+      "value": ""
+    },
+    {
+      "key": "zoneId",
+      "value": ""
+    },
+    {
+      "key": "verticalId",
+      "value": ""
+    },
+    {
+      "key": "subVerticalId",
+      "value": ""
+    },
+    {
+      "key": "substationId",
+      "value": ""
+    },
+    {
+      "key": "outsideAreaSubstationId",
+      "value": ""
+    },
+    {
+      "key": "dateFrom",
+      "value": ""
+    },
+    {
+      "key": "dateTo",
+      "value": ""
+    }
+  ]
+}

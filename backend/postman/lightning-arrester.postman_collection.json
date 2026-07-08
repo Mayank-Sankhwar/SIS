@@ -1,0 +1,207 @@
+{
+  "info": {
+    "name": "Lightning Arrester CRUD",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000/api/v1" },
+    { "key": "adminToken", "value": "" },
+    { "key": "eeToken", "value": "" },
+    { "key": "aeToken", "value": "" },
+    { "key": "jeToken", "value": "" },
+    { "key": "substationId", "value": "" },
+    { "key": "outsideSubstationId", "value": "" },
+    { "key": "lightningArresterId", "value": "" },
+    { "key": "deletedLightningArresterId", "value": "" },
+    { "key": "discomId", "value": "" },
+    { "key": "zoneId", "value": "" },
+    { "key": "verticalId", "value": "" },
+    { "key": "subVerticalId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Create",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": "{{baseUrl}}/lightning-arresters",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"substationId\": \"{{substationId}}\",\n  \"arresterCode\": \"PM-LA-001\",\n  \"locationDescription\": \"33 KV incoming bay\",\n  \"voltageRatingKv\": 33,\n  \"make\": \"Siemens\",\n  \"serialNumber\": \"PM-LA-SN-001\",\n  \"installationDate\": \"2021-04-15\",\n  \"isActive\": true\n}"
+        }
+      }
+    },
+    {
+      "name": "Read",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+        "url": "{{baseUrl}}/lightning-arresters/{{lightningArresterId}}"
+      }
+    },
+    {
+      "name": "List",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+        "url": "{{baseUrl}}/lightning-arresters"
+      }
+    },
+    {
+      "name": "Search",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+        "url": "{{baseUrl}}/lightning-arresters?search=PM-LA"
+      }
+    },
+    {
+      "name": "Pagination",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+        "url": "{{baseUrl}}/lightning-arresters?page=1&limit=10&sortBy=arresterCode&sortOrder=asc"
+      }
+    },
+    {
+      "name": "Update",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": "{{baseUrl}}/lightning-arresters/{{lightningArresterId}}",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"locationDescription\": \"33 KV transformer bay\",\n  \"voltageRatingKv\": 33,\n  \"make\": \"ABB\",\n  \"serialNumber\": \"PM-LA-SN-001-UPD\",\n  \"installationDate\": \"2021-05-01\",\n  \"isActive\": true\n}"
+        }
+      }
+    },
+    {
+      "name": "Delete",
+      "request": {
+        "method": "DELETE",
+        "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+        "url": "{{baseUrl}}/lightning-arresters/{{lightningArresterId}}"
+      }
+    },
+    {
+      "name": "Duplicate Arrester Code",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": "{{baseUrl}}/lightning-arresters",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"substationId\": \"{{substationId}}\",\n  \"arresterCode\": \"PM-LA-001\",\n  \"voltageRatingKv\": 33,\n  \"serialNumber\": \"PM-LA-SN-002\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Duplicate Serial Number",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": "{{baseUrl}}/lightning-arresters",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"substationId\": \"{{substationId}}\",\n  \"arresterCode\": \"PM-LA-002\",\n  \"voltageRatingKv\": 33,\n  \"serialNumber\": \"PM-LA-SN-001\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Future Installation Date",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": "{{baseUrl}}/lightning-arresters",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"substationId\": \"{{substationId}}\",\n  \"arresterCode\": \"PM-LA-FUTURE\",\n  \"voltageRatingKv\": 33,\n  \"installationDate\": \"2999-01-01\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Invalid Voltage",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": "{{baseUrl}}/lightning-arresters",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"substationId\": \"{{substationId}}\",\n  \"arresterCode\": \"PM-LA-BAD-VOLT\",\n  \"voltageRatingKv\": 0\n}"
+        }
+      }
+    },
+    {
+      "name": "Unauthorized",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/lightning-arresters"
+      }
+    },
+    {
+      "name": "Forbidden - JE Create",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{jeToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": "{{baseUrl}}/lightning-arresters",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"substationId\": \"{{substationId}}\",\n  \"arresterCode\": \"JE-LA-001\",\n  \"voltageRatingKv\": 33\n}"
+        }
+      }
+    },
+    {
+      "name": "Forbidden - Outside Area",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{eeToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": "{{baseUrl}}/lightning-arresters",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"substationId\": \"{{outsideSubstationId}}\",\n  \"arresterCode\": \"OUTSIDE-LA-001\",\n  \"voltageRatingKv\": 33\n}"
+        }
+      }
+    },
+    {
+      "name": "Soft Delete Retrieval",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+        "url": "{{baseUrl}}/lightning-arresters/{{deletedLightningArresterId}}"
+      }
+    },
+    {
+      "name": "List Include Deleted",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+        "url": "{{baseUrl}}/lightning-arresters?includeDeleted=true"
+      }
+    }
+  ]
+}

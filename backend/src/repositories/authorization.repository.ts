@@ -79,7 +79,23 @@ export class AuthorizationRepository {
         where: {
           id: area.substationId,
           isActive: true,
-          deletedAt: null
+          deletedAt: null,
+          subVertical: {
+            isActive: true,
+            deletedAt: null,
+            vertical: {
+              isActive: true,
+              deletedAt: null,
+              zone: {
+                isActive: true,
+                deletedAt: null,
+                discom: {
+                  isActive: true,
+                  deletedAt: null
+                }
+              }
+            }
+          }
         },
         select: {
           id: true,
@@ -120,7 +136,19 @@ export class AuthorizationRepository {
         where: {
           id: area.subVerticalId,
           isActive: true,
-          deletedAt: null
+          deletedAt: null,
+          vertical: {
+            isActive: true,
+            deletedAt: null,
+            zone: {
+              isActive: true,
+              deletedAt: null,
+              discom: {
+                isActive: true,
+                deletedAt: null
+              }
+            }
+          }
         },
         select: {
           id: true,
@@ -155,7 +183,15 @@ export class AuthorizationRepository {
         where: {
           id: area.verticalId,
           isActive: true,
-          deletedAt: null
+          deletedAt: null,
+          zone: {
+            isActive: true,
+            deletedAt: null,
+            discom: {
+              isActive: true,
+              deletedAt: null
+            }
+          }
         },
         select: {
           id: true,
@@ -184,7 +220,11 @@ export class AuthorizationRepository {
         where: {
           id: area.zoneId,
           isActive: true,
-          deletedAt: null
+          deletedAt: null,
+          discom: {
+            isActive: true,
+            deletedAt: null
+          }
         },
         select: {
           id: true,

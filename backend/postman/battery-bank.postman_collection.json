@@ -1,0 +1,222 @@
+{
+  "info": {
+    "name": "Battery Bank CRUD",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000/api/v1" },
+    { "key": "adminToken", "value": "" },
+    { "key": "eeToken", "value": "" },
+    { "key": "aeToken", "value": "" },
+    { "key": "jeToken", "value": "" },
+    { "key": "substationId", "value": "" },
+    { "key": "outsideSubstationId", "value": "" },
+    { "key": "batteryBankId", "value": "" },
+    { "key": "deletedBatteryBankId", "value": "" },
+    { "key": "discomId", "value": "" },
+    { "key": "zoneId", "value": "" },
+    { "key": "verticalId", "value": "" },
+    { "key": "subVerticalId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Create",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": "{{baseUrl}}/battery-banks",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"substationId\": \"{{substationId}}\",\n  \"batteryBankCode\": \"PM-BB-001\",\n  \"batteryType\": \"VRLA\",\n  \"voltageV\": 220,\n  \"capacityAh\": 300,\n  \"cellCount\": 110,\n  \"make\": \"Exide\",\n  \"installationDate\": \"2021-04-15\",\n  \"isActive\": true\n}"
+        }
+      }
+    },
+    {
+      "name": "Read",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+        "url": "{{baseUrl}}/battery-banks/{{batteryBankId}}"
+      }
+    },
+    {
+      "name": "List",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+        "url": "{{baseUrl}}/battery-banks"
+      }
+    },
+    {
+      "name": "Search",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+        "url": "{{baseUrl}}/battery-banks?search=PM-BB"
+      }
+    },
+    {
+      "name": "Pagination",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+        "url": "{{baseUrl}}/battery-banks?page=1&limit=10&sortBy=batteryBankCode&sortOrder=asc"
+      }
+    },
+    {
+      "name": "Update",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": "{{baseUrl}}/battery-banks/{{batteryBankId}}",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"batteryType\": \"Lead Acid\",\n  \"voltageV\": 110,\n  \"capacityAh\": 250,\n  \"cellCount\": 55,\n  \"make\": \"Amara Raja\",\n  \"installationDate\": \"2021-05-01\",\n  \"isActive\": true\n}"
+        }
+      }
+    },
+    {
+      "name": "Delete",
+      "request": {
+        "method": "DELETE",
+        "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+        "url": "{{baseUrl}}/battery-banks/{{batteryBankId}}"
+      }
+    },
+    {
+      "name": "Duplicate Battery Bank Code",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": "{{baseUrl}}/battery-banks",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"substationId\": \"{{substationId}}\",\n  \"batteryBankCode\": \"PM-BB-001\",\n  \"voltageV\": 220,\n  \"capacityAh\": 300\n}"
+        }
+      }
+    },
+    {
+      "name": "Invalid Voltage",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": "{{baseUrl}}/battery-banks",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"substationId\": \"{{substationId}}\",\n  \"batteryBankCode\": \"PM-BB-BAD-VOLT\",\n  \"voltageV\": 0,\n  \"capacityAh\": 300\n}"
+        }
+      }
+    },
+    {
+      "name": "Invalid Capacity",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": "{{baseUrl}}/battery-banks",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"substationId\": \"{{substationId}}\",\n  \"batteryBankCode\": \"PM-BB-BAD-CAP\",\n  \"voltageV\": 220,\n  \"capacityAh\": 0\n}"
+        }
+      }
+    },
+    {
+      "name": "Invalid Cell Count",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": "{{baseUrl}}/battery-banks",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"substationId\": \"{{substationId}}\",\n  \"batteryBankCode\": \"PM-BB-BAD-CELL\",\n  \"voltageV\": 220,\n  \"capacityAh\": 300,\n  \"cellCount\": -1\n}"
+        }
+      }
+    },
+    {
+      "name": "Future Installation Date",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": "{{baseUrl}}/battery-banks",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"substationId\": \"{{substationId}}\",\n  \"batteryBankCode\": \"PM-BB-FUTURE\",\n  \"voltageV\": 220,\n  \"capacityAh\": 300,\n  \"installationDate\": \"2999-01-01\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Unauthorized",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/battery-banks"
+      }
+    },
+    {
+      "name": "Forbidden - JE Create",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{jeToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": "{{baseUrl}}/battery-banks",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"substationId\": \"{{substationId}}\",\n  \"batteryBankCode\": \"JE-BB-001\",\n  \"voltageV\": 220,\n  \"capacityAh\": 300\n}"
+        }
+      }
+    },
+    {
+      "name": "Forbidden - Outside Area",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{eeToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": "{{baseUrl}}/battery-banks",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"substationId\": \"{{outsideSubstationId}}\",\n  \"batteryBankCode\": \"OUTSIDE-BB-001\",\n  \"voltageV\": 220,\n  \"capacityAh\": 300\n}"
+        }
+      }
+    },
+    {
+      "name": "Soft Delete Retrieval",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+        "url": "{{baseUrl}}/battery-banks/{{deletedBatteryBankId}}"
+      }
+    },
+    {
+      "name": "List Include Deleted",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+        "url": "{{baseUrl}}/battery-banks?includeDeleted=true"
+      }
+    }
+  ]
+}

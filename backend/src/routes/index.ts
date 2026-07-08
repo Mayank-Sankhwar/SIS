@@ -1,20 +1,38 @@
 import { Router } from "express";
 import { authRoutes } from "./auth.routes.js";
+import { batteryBankRoutes } from "./battery-bank.routes.js";
+import { capacitorBankRoutes } from "./capacitor-bank.routes.js";
+import { dashboardRoutes } from "./dashboard.routes.js";
 import { discomRoutes } from "./discom.routes.js";
 import { healthRoutes } from "./health.routes.js";
+import { incomingSourceRoutes } from "./incoming-source.routes.js";
+import { importRoutes } from "./import.routes.js";
+import { lightningArresterRoutes } from "./lightning-arrester.routes.js";
+import { outgoingFeederRoutes } from "./outgoing-feeder.routes.js";
+import { reportRoutes } from "./report.routes.js";
 import { substationRoutes } from "./substation.routes.js";
 import { subVerticalRoutes } from "./sub-vertical.routes.js";
 import { userManagementRoutes } from "./user-management.routes.js";
+import { transformerRoutes } from "./transformer.routes.js";
 import { verticalRoutes } from "./vertical.routes.js";
 import { zoneRoutes } from "./zone.routes.js";
 
 const router = Router();
 
 router.use("/auth", authRoutes);
+router.use("/battery-banks", batteryBankRoutes);
+router.use("/capacitor-banks", capacitorBankRoutes);
+router.use("/dashboard", dashboardRoutes);
 router.use("/discoms", discomRoutes);
 router.use("/health", healthRoutes);
+router.use("/incoming-sources", incomingSourceRoutes);
+router.use("/imports", importRoutes);
+router.use("/lightning-arresters", lightningArresterRoutes);
+router.use("/outgoing-feeders", outgoingFeederRoutes);
+router.use("/reports", reportRoutes);
 router.use("/substations", substationRoutes);
 router.use("/sub-verticals", subVerticalRoutes);
+router.use("/transformers", transformerRoutes);
 router.use("/users", userManagementRoutes);
 router.use("/verticals", verticalRoutes);
 router.use("/zones", zoneRoutes);

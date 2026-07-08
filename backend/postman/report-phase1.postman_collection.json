@@ -1,0 +1,179 @@
+{
+  "info": {
+    "name": "Reports Phase 1",
+    "description": "Read-only report APIs with JSON and XLSX export support.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Substations JSON",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/reports/substations?format=json"
+      }
+    },
+    {
+      "name": "Substations XLSX",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/reports/substations?format=xlsx&discomId={{discomId}}&zoneId={{zoneId}}&verticalId={{verticalId}}&subVerticalId={{subVerticalId}}&substationId={{substationId}}&voltageLevelKv={{voltageLevelKv}}&isActive={{isActive}}"
+      }
+    },
+    {
+      "name": "Transformers JSON",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/reports/transformers?format=json"
+      }
+    },
+    {
+      "name": "Transformers XLSX",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/reports/transformers?format=xlsx"
+      }
+    },
+    {
+      "name": "Feeders JSON",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/reports/feeders?format=json"
+      }
+    },
+    {
+      "name": "Feeders XLSX",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/reports/feeders?format=xlsx"
+      }
+    },
+    {
+      "name": "Equipment Summary JSON",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/reports/equipment-summary?format=json"
+      }
+    },
+    {
+      "name": "Equipment Summary XLSX",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/reports/equipment-summary?format=xlsx"
+      }
+    },
+    {
+      "name": "Unauthorized",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/v1/reports/substations"
+      }
+    },
+    {
+      "name": "Forbidden Area Data Hidden",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{restrictedToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/reports/substations?substationId={{outsideAreaSubstationId}}"
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "restrictedToken",
+      "value": ""
+    },
+    {
+      "key": "discomId",
+      "value": ""
+    },
+    {
+      "key": "zoneId",
+      "value": ""
+    },
+    {
+      "key": "verticalId",
+      "value": ""
+    },
+    {
+      "key": "subVerticalId",
+      "value": ""
+    },
+    {
+      "key": "substationId",
+      "value": ""
+    },
+    {
+      "key": "outsideAreaSubstationId",
+      "value": ""
+    },
+    {
+      "key": "voltageLevelKv",
+      "value": ""
+    },
+    {
+      "key": "isActive",
+      "value": "true"
+    }
+  ]
+}

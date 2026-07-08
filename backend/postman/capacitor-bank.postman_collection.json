@@ -1,0 +1,222 @@
+{
+  "info": {
+    "name": "Capacitor Bank CRUD",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000/api/v1" },
+    { "key": "adminToken", "value": "" },
+    { "key": "eeToken", "value": "" },
+    { "key": "aeToken", "value": "" },
+    { "key": "jeToken", "value": "" },
+    { "key": "substationId", "value": "" },
+    { "key": "outsideSubstationId", "value": "" },
+    { "key": "capacitorBankId", "value": "" },
+    { "key": "deletedCapacitorBankId", "value": "" },
+    { "key": "discomId", "value": "" },
+    { "key": "zoneId", "value": "" },
+    { "key": "verticalId", "value": "" },
+    { "key": "subVerticalId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Create",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": "{{baseUrl}}/capacitor-banks",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"substationId\": \"{{substationId}}\",\n  \"capacitorBankCode\": \"PM-CB-001\",\n  \"capacityMvar\": 2.5,\n  \"voltageLevelKv\": 11,\n  \"stepsCount\": 5,\n  \"make\": \"Schneider\",\n  \"installationDate\": \"2021-04-15\",\n  \"isActive\": true\n}"
+        }
+      }
+    },
+    {
+      "name": "Read",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+        "url": "{{baseUrl}}/capacitor-banks/{{capacitorBankId}}"
+      }
+    },
+    {
+      "name": "List",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+        "url": "{{baseUrl}}/capacitor-banks"
+      }
+    },
+    {
+      "name": "Search",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+        "url": "{{baseUrl}}/capacitor-banks?search=PM-CB"
+      }
+    },
+    {
+      "name": "Pagination",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+        "url": "{{baseUrl}}/capacitor-banks?page=1&limit=10&sortBy=capacitorBankCode&sortOrder=asc"
+      }
+    },
+    {
+      "name": "Update",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": "{{baseUrl}}/capacitor-banks/{{capacitorBankId}}",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"capacityMvar\": 3,\n  \"voltageLevelKv\": 11,\n  \"stepsCount\": 6,\n  \"make\": \"L&T\",\n  \"installationDate\": \"2021-05-01\",\n  \"isActive\": true\n}"
+        }
+      }
+    },
+    {
+      "name": "Delete",
+      "request": {
+        "method": "DELETE",
+        "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+        "url": "{{baseUrl}}/capacitor-banks/{{capacitorBankId}}"
+      }
+    },
+    {
+      "name": "Duplicate Capacitor Bank Code",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": "{{baseUrl}}/capacitor-banks",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"substationId\": \"{{substationId}}\",\n  \"capacitorBankCode\": \"PM-CB-001\",\n  \"capacityMvar\": 2.5,\n  \"voltageLevelKv\": 11\n}"
+        }
+      }
+    },
+    {
+      "name": "Invalid Capacity",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": "{{baseUrl}}/capacitor-banks",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"substationId\": \"{{substationId}}\",\n  \"capacitorBankCode\": \"PM-CB-BAD-CAP\",\n  \"capacityMvar\": 0,\n  \"voltageLevelKv\": 11\n}"
+        }
+      }
+    },
+    {
+      "name": "Invalid Voltage",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": "{{baseUrl}}/capacitor-banks",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"substationId\": \"{{substationId}}\",\n  \"capacitorBankCode\": \"PM-CB-BAD-VOLT\",\n  \"capacityMvar\": 2.5,\n  \"voltageLevelKv\": 0\n}"
+        }
+      }
+    },
+    {
+      "name": "Invalid Steps Count",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": "{{baseUrl}}/capacitor-banks",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"substationId\": \"{{substationId}}\",\n  \"capacitorBankCode\": \"PM-CB-BAD-STEPS\",\n  \"capacityMvar\": 2.5,\n  \"voltageLevelKv\": 11,\n  \"stepsCount\": -1\n}"
+        }
+      }
+    },
+    {
+      "name": "Future Installation Date",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": "{{baseUrl}}/capacitor-banks",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"substationId\": \"{{substationId}}\",\n  \"capacitorBankCode\": \"PM-CB-FUTURE\",\n  \"capacityMvar\": 2.5,\n  \"voltageLevelKv\": 11,\n  \"installationDate\": \"2999-01-01\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Unauthorized",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/capacitor-banks"
+      }
+    },
+    {
+      "name": "Forbidden - JE Create",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{jeToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": "{{baseUrl}}/capacitor-banks",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"substationId\": \"{{substationId}}\",\n  \"capacitorBankCode\": \"JE-CB-001\",\n  \"capacityMvar\": 2.5,\n  \"voltageLevelKv\": 11\n}"
+        }
+      }
+    },
+    {
+      "name": "Forbidden - Outside Area",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{eeToken}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "url": "{{baseUrl}}/capacitor-banks",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"substationId\": \"{{outsideSubstationId}}\",\n  \"capacitorBankCode\": \"OUTSIDE-CB-001\",\n  \"capacityMvar\": 2.5,\n  \"voltageLevelKv\": 11\n}"
+        }
+      }
+    },
+    {
+      "name": "Soft Delete Retrieval",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+        "url": "{{baseUrl}}/capacitor-banks/{{deletedCapacitorBankId}}"
+      }
+    },
+    {
+      "name": "List Include Deleted",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+        "url": "{{baseUrl}}/capacitor-banks?includeDeleted=true"
+      }
+    }
+  ]
+}

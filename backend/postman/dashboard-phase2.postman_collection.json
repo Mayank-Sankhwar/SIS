@@ -1,0 +1,227 @@
+{
+  "info": {
+    "name": "Dashboard Phase 2",
+    "description": "Read-only analytical dashboard APIs for equipment distribution, substation status, transformer capacity, feeder load, import history, import errors, and map data.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Equipment Distribution",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/dashboard/equipment-distribution?discomId={{discomId}}&zoneId={{zoneId}}&verticalId={{verticalId}}&subVerticalId={{subVerticalId}}&substationId={{substationId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "dashboard",
+            "equipment-distribution"
+          ],
+          "query": [
+            {
+              "key": "discomId",
+              "value": "{{discomId}}",
+              "disabled": true
+            },
+            {
+              "key": "zoneId",
+              "value": "{{zoneId}}",
+              "disabled": true
+            },
+            {
+              "key": "verticalId",
+              "value": "{{verticalId}}",
+              "disabled": true
+            },
+            {
+              "key": "subVerticalId",
+              "value": "{{subVerticalId}}",
+              "disabled": true
+            },
+            {
+              "key": "substationId",
+              "value": "{{substationId}}",
+              "disabled": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Substation Status",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/dashboard/substation-status"
+      }
+    },
+    {
+      "name": "Transformer Capacity",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/dashboard/transformer-capacity"
+      }
+    },
+    {
+      "name": "Feeder Load",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/dashboard/feeder-load"
+      }
+    },
+    {
+      "name": "Import History",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/dashboard/import-history?dateFrom={{dateFrom}}&dateTo={{dateTo}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "dashboard",
+            "import-history"
+          ],
+          "query": [
+            {
+              "key": "dateFrom",
+              "value": "{{dateFrom}}",
+              "disabled": true
+            },
+            {
+              "key": "dateTo",
+              "value": "{{dateTo}}",
+              "disabled": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Recent Import Errors",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/dashboard/recent-import-errors"
+      }
+    },
+    {
+      "name": "Map",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/dashboard/map"
+      }
+    },
+    {
+      "name": "Unauthorized",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/v1/dashboard/equipment-distribution"
+      }
+    },
+    {
+      "name": "Forbidden Area Filter",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{restrictedToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/dashboard/map?substationId={{outsideAreaSubstationId}}"
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "restrictedToken",
+      "value": ""
+    },
+    {
+      "key": "discomId",
+      "value": ""
+    },
+    {
+      "key": "zoneId",
+      "value": ""
+    },
+    {
+      "key": "verticalId",
+      "value": ""
+    },
+    {
+      "key": "subVerticalId",
+      "value": ""
+    },
+    {
+      "key": "substationId",
+      "value": ""
+    },
+    {
+      "key": "outsideAreaSubstationId",
+      "value": ""
+    },
+    {
+      "key": "dateFrom",
+      "value": ""
+    },
+    {
+      "key": "dateTo",
+      "value": ""
+    }
+  ]
+}

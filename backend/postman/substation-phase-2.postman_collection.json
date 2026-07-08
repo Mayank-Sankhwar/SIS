@@ -1,0 +1,116 @@
+{
+  "info": {
+    "name": "Substation Phase 2",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api/v1"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "substationId",
+      "value": ""
+    },
+    {
+      "key": "subVerticalId",
+      "value": ""
+    },
+    {
+      "key": "verticalId",
+      "value": ""
+    },
+    {
+      "key": "zoneId",
+      "value": ""
+    },
+    {
+      "key": "discomId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "List Substations",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{baseUrl}}/substations"
+      }
+    },
+    {
+      "name": "Pagination",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{baseUrl}}/substations?page=1&limit=20"
+      }
+    },
+    {
+      "name": "Filtering",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{baseUrl}}/substations?discomId={{discomId}}&zoneId={{zoneId}}&verticalId={{verticalId}}&subVerticalId={{subVerticalId}}&voltageLevelKv=33&isActive=true&includeDeleted=false"
+      }
+    },
+    {
+      "name": "Searching",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{baseUrl}}/substations?search=central"
+      }
+    },
+    {
+      "name": "Sorting",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{baseUrl}}/substations?sortBy=voltageLevelKv&sortOrder=asc"
+      }
+    },
+    {
+      "name": "Soft Delete",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{baseUrl}}/substations/{{substationId}}"
+      }
+    }
+  ]
+}

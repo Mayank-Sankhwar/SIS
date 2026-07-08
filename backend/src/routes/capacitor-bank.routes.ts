@@ -1,34 +1,28 @@
 import { RoleName } from "@prisma/client";
 import type { RequestHandler } from "express";
 import { Router } from "express";
-import { SubstationController } from "../controllers/substation.controller.js";
+import { CapacitorBankController } from "../controllers/capacitor-bank.controller.js";
 import { authenticate, authorizeRoles, checkAreaAccess } from "../middlewares/auth.middleware.js";
 import { validateBody, validateParams, validateQuery } from "../middlewares/validate.middleware.js";
 import { asyncHandler } from "../utils/async-handler.js";
 import {
-  createSubstationBodySchema,
-  listSubstationsQuerySchema,
-  substationIdParamsSchema,
-  updateSubstationBodySchema
-} from "../validators/substation.validator.js";
+  capacitorBankIdParamsSchema,
+  createCapacitorBankBodySchema,
+  listCapacitorBanksQuerySchema,
+  updateCapacitorBankBodySchema
+} from "../validators/capacitor-bank.validator.js";
 
 const router = Router();
-const substationController = new SubstationController();
-
-const exposeIdAsSubstationId: RequestHandler = (req, _res, next) => {
-  const { id } = req.params;
-
-  if (id) {
-    req.params.substationId = id;
-  }
-
-  next();
-};
+const capacitorBankController = new CapacitorBankController();
 
 const explicitListAreaAccess = checkAreaAccess();
 const checkExplicitListAreaAccess: RequestHandler = (req, res, next) => {
   const hasAreaFilter = Boolean(
-    req.query.discomId || req.query.zoneId || req.query.verticalId || req.query.subVerticalId
+    req.query.discomId ||
+      req.query.zoneId ||
+      req.query.verticalId ||
+      req.query.subVerticalId ||
+      req.query.substationId
   );
 
   if (!hasAreaFilter) {
@@ -41,10 +35,10 @@ const checkExplicitListAreaAccess: RequestHandler = (req, res, next) => {
 
 /**
  * @openapi
- * /api/v1/substations:
+ * /api/v1/capacitor-banks:
  *   post:
- *     summary: Create a Substation
- *     tags: [Substations]
+ *     summary: Create a Capacitor Bank
+ *     tags: [Capacitor Banks]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -53,42 +47,39 @@ const checkExplicitListAreaAccess: RequestHandler = (req, res, next) => {
  *         application/json:
  *           schema:
  *             type: object
- *             required: [subVerticalId, name, code, voltageLevelKv]
+ *             required: [substationId, capacitorBankCode, capacityMvar, voltageLevelKv]
  *             properties:
- *               subVerticalId:
+ *               substationId:
  *                 type: string
  *                 format: uuid
- *               name:
+ *               capacitorBankCode:
  *                 type: string
- *                 example: Central 33/11 KV Substation
- *               code:
- *                 type: string
- *                 example: SS-CENTRAL-01
+ *                 example: CB-GOV-01
+ *               capacityMvar:
+ *                 type: number
+ *                 example: 2.5
  *               voltageLevelKv:
  *                 type: number
- *                 example: 33
- *               address:
+ *                 example: 11
+ *               stepsCount:
+ *                 type: integer
+ *                 minimum: 0
+ *                 example: 5
+ *               make:
  *                 type: string
- *               latitude:
- *                 type: number
- *                 minimum: -90
- *                 maximum: 90
- *               longitude:
- *                 type: number
- *                 minimum: -180
- *                 maximum: 180
- *               commissioningDate:
+ *                 example: L&T
+ *               installationDate:
  *                 type: string
  *                 format: date
  *               isActive:
  *                 type: boolean
  *     responses:
  *       201:
- *         description: Substation created successfully
+ *         description: Capacitor Bank created successfully
  *       403:
  *         description: Role or area access denied
  *       409:
- *         description: Duplicate name or code within this SubVertical
+ *         description: Duplicate capacitor bank code within this Substation
  *       422:
  *         description: Validation failed or parent hierarchy is inactive/deleted
  */
@@ -96,17 +87,17 @@ router.post(
   "/",
   authenticate,
   authorizeRoles(RoleName.ADMIN, RoleName.EE, RoleName.AE),
-  validateBody(createSubstationBodySchema),
+  validateBody(createCapacitorBankBodySchema),
   checkAreaAccess(),
-  asyncHandler(substationController.create)
+  asyncHandler(capacitorBankController.create)
 );
 
 /**
  * @openapi
- * /api/v1/substations:
+ * /api/v1/capacitor-banks:
  *   get:
- *     summary: List Substations
- *     tags: [Substations]
+ *     summary: List Capacitor Banks
+ *     tags: [Capacitor Banks]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -128,12 +119,17 @@ router.post(
  *         name: sortBy
  *         schema:
  *           type: string
- *           enum: [name, code, createdAt, updatedAt, commissioningDate, voltageLevelKv]
+ *           enum: [capacitorBankCode, capacityMvar, voltageLevelKv, stepsCount, make, installationDate, isActive, createdAt, updatedAt]
  *       - in: query
  *         name: sortOrder
  *         schema:
  *           type: string
  *           enum: [asc, desc]
+ *       - in: query
+ *         name: substationId
+ *         schema:
+ *           type: string
+ *           format: uuid
  *       - in: query
  *         name: subVerticalId
  *         schema:
@@ -155,6 +151,10 @@ router.post(
  *           type: string
  *           format: uuid
  *       - in: query
+ *         name: capacityMvar
+ *         schema:
+ *           type: number
+ *       - in: query
  *         name: voltageLevelKv
  *         schema:
  *           type: number
@@ -169,7 +169,7 @@ router.post(
  *           default: false
  *     responses:
  *       200:
- *         description: Substations fetched successfully
+ *         description: Capacitor Banks fetched successfully
  *       403:
  *         description: Role or area access denied
  *       422:
@@ -179,17 +179,17 @@ router.get(
   "/",
   authenticate,
   authorizeRoles(RoleName.ADMIN, RoleName.EE, RoleName.AE, RoleName.JE),
-  validateQuery(listSubstationsQuerySchema),
+  validateQuery(listCapacitorBanksQuerySchema),
   checkExplicitListAreaAccess,
-  asyncHandler(substationController.list)
+  asyncHandler(capacitorBankController.list)
 );
 
 /**
  * @openapi
- * /api/v1/substations/{id}:
+ * /api/v1/capacitor-banks/{id}:
  *   get:
- *     summary: Get Substation by ID
- *     tags: [Substations]
+ *     summary: Get Capacitor Bank by ID
+ *     tags: [Capacitor Banks]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -201,28 +201,26 @@ router.get(
  *           format: uuid
  *     responses:
  *       200:
- *         description: Substation fetched successfully
+ *         description: Capacitor Bank fetched successfully
  *       403:
  *         description: Role or area access denied
  *       404:
- *         description: Substation not found
+ *         description: Capacitor Bank not found
  */
 router.get(
   "/:id",
   authenticate,
   authorizeRoles(RoleName.ADMIN, RoleName.EE, RoleName.AE, RoleName.JE),
-  validateParams(substationIdParamsSchema),
-  exposeIdAsSubstationId,
-  checkAreaAccess(),
-  asyncHandler(substationController.getById)
+  validateParams(capacitorBankIdParamsSchema),
+  asyncHandler(capacitorBankController.getById)
 );
 
 /**
  * @openapi
- * /api/v1/substations/{id}:
+ * /api/v1/capacitor-banks/{id}:
  *   patch:
- *     summary: Update Substation
- *     tags: [Substations]
+ *     summary: Update Capacitor Bank
+ *     tags: [Capacitor Banks]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -239,36 +237,29 @@ router.get(
  *           schema:
  *             type: object
  *             properties:
- *               name:
- *                 type: string
- *               code:
- *                 type: string
+ *               capacityMvar:
+ *                 type: number
  *               voltageLevelKv:
  *                 type: number
- *               address:
+ *               stepsCount:
+ *                 type: integer
+ *                 minimum: 0
+ *               make:
  *                 type: string
- *               latitude:
- *                 type: number
- *                 minimum: -90
- *                 maximum: 90
- *               longitude:
- *                 type: number
- *                 minimum: -180
- *                 maximum: 180
- *               commissioningDate:
+ *               installationDate:
  *                 type: string
  *                 format: date
  *               isActive:
  *                 type: boolean
  *     responses:
  *       200:
- *         description: Substation updated successfully
+ *         description: Capacitor Bank updated successfully
  *       403:
  *         description: Role or area access denied
  *       404:
- *         description: Substation not found
+ *         description: Capacitor Bank not found
  *       409:
- *         description: Duplicate or deleted record
+ *         description: Deleted record
  *       422:
  *         description: Validation failed or parent hierarchy is inactive/deleted
  */
@@ -276,19 +267,17 @@ router.patch(
   "/:id",
   authenticate,
   authorizeRoles(RoleName.ADMIN, RoleName.EE, RoleName.AE),
-  validateParams(substationIdParamsSchema),
-  validateBody(updateSubstationBodySchema),
-  exposeIdAsSubstationId,
-  checkAreaAccess(),
-  asyncHandler(substationController.update)
+  validateParams(capacitorBankIdParamsSchema),
+  validateBody(updateCapacitorBankBodySchema),
+  asyncHandler(capacitorBankController.update)
 );
 
 /**
  * @openapi
- * /api/v1/substations/{id}:
+ * /api/v1/capacitor-banks/{id}:
  *   delete:
- *     summary: Soft delete Substation
- *     tags: [Substations]
+ *     summary: Soft delete Capacitor Bank
+ *     tags: [Capacitor Banks]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -300,22 +289,20 @@ router.patch(
  *           format: uuid
  *     responses:
  *       200:
- *         description: Substation deleted successfully
+ *         description: Capacitor Bank deleted successfully
  *       403:
  *         description: Role or area access denied
  *       404:
- *         description: Substation not found
+ *         description: Capacitor Bank not found
  *       409:
- *         description: Substation contains equipment or is already deleted
+ *         description: Capacitor Bank is already deleted
  */
 router.delete(
   "/:id",
   authenticate,
-  authorizeRoles(RoleName.ADMIN),
-  validateParams(substationIdParamsSchema),
-  exposeIdAsSubstationId,
-  checkAreaAccess(),
-  asyncHandler(substationController.softDelete)
+  authorizeRoles(RoleName.ADMIN, RoleName.EE, RoleName.AE),
+  validateParams(capacitorBankIdParamsSchema),
+  asyncHandler(capacitorBankController.softDelete)
 );
 
-export { router as substationRoutes };
+export { router as capacitorBankRoutes };

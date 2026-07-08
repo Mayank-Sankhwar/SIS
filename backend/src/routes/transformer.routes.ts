@@ -1,34 +1,28 @@
 import { RoleName } from "@prisma/client";
 import type { RequestHandler } from "express";
 import { Router } from "express";
-import { SubstationController } from "../controllers/substation.controller.js";
+import { TransformerController } from "../controllers/transformer.controller.js";
 import { authenticate, authorizeRoles, checkAreaAccess } from "../middlewares/auth.middleware.js";
 import { validateBody, validateParams, validateQuery } from "../middlewares/validate.middleware.js";
 import { asyncHandler } from "../utils/async-handler.js";
 import {
-  createSubstationBodySchema,
-  listSubstationsQuerySchema,
-  substationIdParamsSchema,
-  updateSubstationBodySchema
-} from "../validators/substation.validator.js";
+  createTransformerBodySchema,
+  listTransformersQuerySchema,
+  transformerIdParamsSchema,
+  updateTransformerBodySchema
+} from "../validators/transformer.validator.js";
 
 const router = Router();
-const substationController = new SubstationController();
-
-const exposeIdAsSubstationId: RequestHandler = (req, _res, next) => {
-  const { id } = req.params;
-
-  if (id) {
-    req.params.substationId = id;
-  }
-
-  next();
-};
+const transformerController = new TransformerController();
 
 const explicitListAreaAccess = checkAreaAccess();
 const checkExplicitListAreaAccess: RequestHandler = (req, res, next) => {
   const hasAreaFilter = Boolean(
-    req.query.discomId || req.query.zoneId || req.query.verticalId || req.query.subVerticalId
+    req.query.discomId ||
+      req.query.zoneId ||
+      req.query.verticalId ||
+      req.query.subVerticalId ||
+      req.query.substationId
   );
 
   if (!hasAreaFilter) {
@@ -41,10 +35,10 @@ const checkExplicitListAreaAccess: RequestHandler = (req, res, next) => {
 
 /**
  * @openapi
- * /api/v1/substations:
+ * /api/v1/transformers:
  *   post:
- *     summary: Create a Substation
- *     tags: [Substations]
+ *     summary: Create a Transformer
+ *     tags: [Transformers]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -53,30 +47,29 @@ const checkExplicitListAreaAccess: RequestHandler = (req, res, next) => {
  *         application/json:
  *           schema:
  *             type: object
- *             required: [subVerticalId, name, code, voltageLevelKv]
+ *             required: [substationId, transformerCode, capacityMva, primaryVoltageKv, secondaryVoltageKv]
  *             properties:
- *               subVerticalId:
+ *               substationId:
  *                 type: string
  *                 format: uuid
- *               name:
+ *               transformerCode:
  *                 type: string
- *                 example: Central 33/11 KV Substation
- *               code:
- *                 type: string
- *                 example: SS-CENTRAL-01
- *               voltageLevelKv:
+ *                 example: PTR-GOV-01
+ *               capacityMva:
+ *                 type: number
+ *                 example: 10
+ *               primaryVoltageKv:
  *                 type: number
  *                 example: 33
- *               address:
+ *               secondaryVoltageKv:
+ *                 type: number
+ *                 example: 11
+ *               make:
  *                 type: string
- *               latitude:
- *                 type: number
- *                 minimum: -90
- *                 maximum: 90
- *               longitude:
- *                 type: number
- *                 minimum: -180
- *                 maximum: 180
+ *                 example: BHEL
+ *               serialNumber:
+ *                 type: string
+ *                 example: TR-BPL-2018-001
  *               commissioningDate:
  *                 type: string
  *                 format: date
@@ -84,11 +77,11 @@ const checkExplicitListAreaAccess: RequestHandler = (req, res, next) => {
  *                 type: boolean
  *     responses:
  *       201:
- *         description: Substation created successfully
+ *         description: Transformer created successfully
  *       403:
  *         description: Role or area access denied
  *       409:
- *         description: Duplicate name or code within this SubVertical
+ *         description: Duplicate transformer code or serial number
  *       422:
  *         description: Validation failed or parent hierarchy is inactive/deleted
  */
@@ -96,17 +89,17 @@ router.post(
   "/",
   authenticate,
   authorizeRoles(RoleName.ADMIN, RoleName.EE, RoleName.AE),
-  validateBody(createSubstationBodySchema),
+  validateBody(createTransformerBodySchema),
   checkAreaAccess(),
-  asyncHandler(substationController.create)
+  asyncHandler(transformerController.create)
 );
 
 /**
  * @openapi
- * /api/v1/substations:
+ * /api/v1/transformers:
  *   get:
- *     summary: List Substations
- *     tags: [Substations]
+ *     summary: List Transformers
+ *     tags: [Transformers]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -128,12 +121,17 @@ router.post(
  *         name: sortBy
  *         schema:
  *           type: string
- *           enum: [name, code, createdAt, updatedAt, commissioningDate, voltageLevelKv]
+ *           enum: [transformerCode, capacityMva, primaryVoltageKv, secondaryVoltageKv, make, serialNumber, commissioningDate, isActive, createdAt, updatedAt]
  *       - in: query
  *         name: sortOrder
  *         schema:
  *           type: string
  *           enum: [asc, desc]
+ *       - in: query
+ *         name: substationId
+ *         schema:
+ *           type: string
+ *           format: uuid
  *       - in: query
  *         name: subVerticalId
  *         schema:
@@ -155,7 +153,15 @@ router.post(
  *           type: string
  *           format: uuid
  *       - in: query
- *         name: voltageLevelKv
+ *         name: capacityMva
+ *         schema:
+ *           type: number
+ *       - in: query
+ *         name: primaryVoltageKv
+ *         schema:
+ *           type: number
+ *       - in: query
+ *         name: secondaryVoltageKv
  *         schema:
  *           type: number
  *       - in: query
@@ -169,7 +175,7 @@ router.post(
  *           default: false
  *     responses:
  *       200:
- *         description: Substations fetched successfully
+ *         description: Transformers fetched successfully
  *       403:
  *         description: Role or area access denied
  *       422:
@@ -179,17 +185,17 @@ router.get(
   "/",
   authenticate,
   authorizeRoles(RoleName.ADMIN, RoleName.EE, RoleName.AE, RoleName.JE),
-  validateQuery(listSubstationsQuerySchema),
+  validateQuery(listTransformersQuerySchema),
   checkExplicitListAreaAccess,
-  asyncHandler(substationController.list)
+  asyncHandler(transformerController.list)
 );
 
 /**
  * @openapi
- * /api/v1/substations/{id}:
+ * /api/v1/transformers/{id}:
  *   get:
- *     summary: Get Substation by ID
- *     tags: [Substations]
+ *     summary: Get Transformer by ID
+ *     tags: [Transformers]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -201,28 +207,26 @@ router.get(
  *           format: uuid
  *     responses:
  *       200:
- *         description: Substation fetched successfully
+ *         description: Transformer fetched successfully
  *       403:
  *         description: Role or area access denied
  *       404:
- *         description: Substation not found
+ *         description: Transformer not found
  */
 router.get(
   "/:id",
   authenticate,
   authorizeRoles(RoleName.ADMIN, RoleName.EE, RoleName.AE, RoleName.JE),
-  validateParams(substationIdParamsSchema),
-  exposeIdAsSubstationId,
-  checkAreaAccess(),
-  asyncHandler(substationController.getById)
+  validateParams(transformerIdParamsSchema),
+  asyncHandler(transformerController.getById)
 );
 
 /**
  * @openapi
- * /api/v1/substations/{id}:
+ * /api/v1/transformers/{id}:
  *   patch:
- *     summary: Update Substation
- *     tags: [Substations]
+ *     summary: Update Transformer
+ *     tags: [Transformers]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -239,22 +243,16 @@ router.get(
  *           schema:
  *             type: object
  *             properties:
- *               name:
- *                 type: string
- *               code:
- *                 type: string
- *               voltageLevelKv:
+ *               capacityMva:
  *                 type: number
- *               address:
+ *               primaryVoltageKv:
+ *                 type: number
+ *               secondaryVoltageKv:
+ *                 type: number
+ *               make:
  *                 type: string
- *               latitude:
- *                 type: number
- *                 minimum: -90
- *                 maximum: 90
- *               longitude:
- *                 type: number
- *                 minimum: -180
- *                 maximum: 180
+ *               serialNumber:
+ *                 type: string
  *               commissioningDate:
  *                 type: string
  *                 format: date
@@ -262,13 +260,13 @@ router.get(
  *                 type: boolean
  *     responses:
  *       200:
- *         description: Substation updated successfully
+ *         description: Transformer updated successfully
  *       403:
  *         description: Role or area access denied
  *       404:
- *         description: Substation not found
+ *         description: Transformer not found
  *       409:
- *         description: Duplicate or deleted record
+ *         description: Duplicate serial number or deleted record
  *       422:
  *         description: Validation failed or parent hierarchy is inactive/deleted
  */
@@ -276,19 +274,17 @@ router.patch(
   "/:id",
   authenticate,
   authorizeRoles(RoleName.ADMIN, RoleName.EE, RoleName.AE),
-  validateParams(substationIdParamsSchema),
-  validateBody(updateSubstationBodySchema),
-  exposeIdAsSubstationId,
-  checkAreaAccess(),
-  asyncHandler(substationController.update)
+  validateParams(transformerIdParamsSchema),
+  validateBody(updateTransformerBodySchema),
+  asyncHandler(transformerController.update)
 );
 
 /**
  * @openapi
- * /api/v1/substations/{id}:
+ * /api/v1/transformers/{id}:
  *   delete:
- *     summary: Soft delete Substation
- *     tags: [Substations]
+ *     summary: Soft delete Transformer
+ *     tags: [Transformers]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -300,22 +296,20 @@ router.patch(
  *           format: uuid
  *     responses:
  *       200:
- *         description: Substation deleted successfully
+ *         description: Transformer deleted successfully
  *       403:
  *         description: Role or area access denied
  *       404:
- *         description: Substation not found
+ *         description: Transformer not found
  *       409:
- *         description: Substation contains equipment or is already deleted
+ *         description: Transformer is already deleted
  */
 router.delete(
   "/:id",
   authenticate,
-  authorizeRoles(RoleName.ADMIN),
-  validateParams(substationIdParamsSchema),
-  exposeIdAsSubstationId,
-  checkAreaAccess(),
-  asyncHandler(substationController.softDelete)
+  authorizeRoles(RoleName.ADMIN, RoleName.EE, RoleName.AE),
+  validateParams(transformerIdParamsSchema),
+  asyncHandler(transformerController.softDelete)
 );
 
-export { router as substationRoutes };
+export { router as transformerRoutes };

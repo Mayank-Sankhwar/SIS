@@ -1,34 +1,28 @@
 import { RoleName } from "@prisma/client";
 import type { RequestHandler } from "express";
 import { Router } from "express";
-import { SubstationController } from "../controllers/substation.controller.js";
+import { IncomingSourceController } from "../controllers/incoming-source.controller.js";
 import { authenticate, authorizeRoles, checkAreaAccess } from "../middlewares/auth.middleware.js";
 import { validateBody, validateParams, validateQuery } from "../middlewares/validate.middleware.js";
 import { asyncHandler } from "../utils/async-handler.js";
 import {
-  createSubstationBodySchema,
-  listSubstationsQuerySchema,
-  substationIdParamsSchema,
-  updateSubstationBodySchema
-} from "../validators/substation.validator.js";
+  createIncomingSourceBodySchema,
+  incomingSourceIdParamsSchema,
+  listIncomingSourcesQuerySchema,
+  updateIncomingSourceBodySchema
+} from "../validators/incoming-source.validator.js";
 
 const router = Router();
-const substationController = new SubstationController();
-
-const exposeIdAsSubstationId: RequestHandler = (req, _res, next) => {
-  const { id } = req.params;
-
-  if (id) {
-    req.params.substationId = id;
-  }
-
-  next();
-};
+const incomingSourceController = new IncomingSourceController();
 
 const explicitListAreaAccess = checkAreaAccess();
 const checkExplicitListAreaAccess: RequestHandler = (req, res, next) => {
   const hasAreaFilter = Boolean(
-    req.query.discomId || req.query.zoneId || req.query.verticalId || req.query.subVerticalId
+    req.query.discomId ||
+      req.query.zoneId ||
+      req.query.verticalId ||
+      req.query.subVerticalId ||
+      req.query.substationId
   );
 
   if (!hasAreaFilter) {
@@ -41,10 +35,10 @@ const checkExplicitListAreaAccess: RequestHandler = (req, res, next) => {
 
 /**
  * @openapi
- * /api/v1/substations:
+ * /api/v1/incoming-sources:
  *   post:
- *     summary: Create a Substation
- *     tags: [Substations]
+ *     summary: Create an Incoming Source
+ *     tags: [Incoming Sources]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -53,42 +47,35 @@ const checkExplicitListAreaAccess: RequestHandler = (req, res, next) => {
  *         application/json:
  *           schema:
  *             type: object
- *             required: [subVerticalId, name, code, voltageLevelKv]
+ *             required: [substationId, sourceName, voltageLevelKv]
  *             properties:
- *               subVerticalId:
+ *               substationId:
  *                 type: string
  *                 format: uuid
- *               name:
+ *               sourceName:
  *                 type: string
- *                 example: Central 33/11 KV Substation
- *               code:
+ *                 example: 132 KV Bhopal Grid
+ *               sourceType:
  *                 type: string
- *                 example: SS-CENTRAL-01
+ *                 example: GRID
  *               voltageLevelKv:
  *                 type: number
- *                 example: 33
- *               address:
+ *                 example: 132
+ *               feederName:
  *                 type: string
- *               latitude:
- *                 type: number
- *                 minimum: -90
- *                 maximum: 90
- *               longitude:
- *                 type: number
- *                 minimum: -180
- *                 maximum: 180
- *               commissioningDate:
+ *                 example: BPL-GRID-1
+ *               meterNumber:
  *                 type: string
- *                 format: date
+ *                 example: MTR-BPL-1001
  *               isActive:
  *                 type: boolean
  *     responses:
  *       201:
- *         description: Substation created successfully
+ *         description: Incoming Source created successfully
  *       403:
  *         description: Role or area access denied
  *       409:
- *         description: Duplicate name or code within this SubVertical
+ *         description: Duplicate source name within this Substation
  *       422:
  *         description: Validation failed or parent hierarchy is inactive/deleted
  */
@@ -96,17 +83,17 @@ router.post(
   "/",
   authenticate,
   authorizeRoles(RoleName.ADMIN, RoleName.EE, RoleName.AE),
-  validateBody(createSubstationBodySchema),
+  validateBody(createIncomingSourceBodySchema),
   checkAreaAccess(),
-  asyncHandler(substationController.create)
+  asyncHandler(incomingSourceController.create)
 );
 
 /**
  * @openapi
- * /api/v1/substations:
+ * /api/v1/incoming-sources:
  *   get:
- *     summary: List Substations
- *     tags: [Substations]
+ *     summary: List Incoming Sources
+ *     tags: [Incoming Sources]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -128,12 +115,17 @@ router.post(
  *         name: sortBy
  *         schema:
  *           type: string
- *           enum: [name, code, createdAt, updatedAt, commissioningDate, voltageLevelKv]
+ *           enum: [sourceName, sourceType, voltageLevelKv, feederName, meterNumber, isActive, createdAt, updatedAt]
  *       - in: query
  *         name: sortOrder
  *         schema:
  *           type: string
  *           enum: [asc, desc]
+ *       - in: query
+ *         name: substationId
+ *         schema:
+ *           type: string
+ *           format: uuid
  *       - in: query
  *         name: subVerticalId
  *         schema:
@@ -169,7 +161,7 @@ router.post(
  *           default: false
  *     responses:
  *       200:
- *         description: Substations fetched successfully
+ *         description: Incoming Sources fetched successfully
  *       403:
  *         description: Role or area access denied
  *       422:
@@ -179,17 +171,17 @@ router.get(
   "/",
   authenticate,
   authorizeRoles(RoleName.ADMIN, RoleName.EE, RoleName.AE, RoleName.JE),
-  validateQuery(listSubstationsQuerySchema),
+  validateQuery(listIncomingSourcesQuerySchema),
   checkExplicitListAreaAccess,
-  asyncHandler(substationController.list)
+  asyncHandler(incomingSourceController.list)
 );
 
 /**
  * @openapi
- * /api/v1/substations/{id}:
+ * /api/v1/incoming-sources/{id}:
  *   get:
- *     summary: Get Substation by ID
- *     tags: [Substations]
+ *     summary: Get Incoming Source by ID
+ *     tags: [Incoming Sources]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -201,28 +193,26 @@ router.get(
  *           format: uuid
  *     responses:
  *       200:
- *         description: Substation fetched successfully
+ *         description: Incoming Source fetched successfully
  *       403:
  *         description: Role or area access denied
  *       404:
- *         description: Substation not found
+ *         description: Incoming Source not found
  */
 router.get(
   "/:id",
   authenticate,
   authorizeRoles(RoleName.ADMIN, RoleName.EE, RoleName.AE, RoleName.JE),
-  validateParams(substationIdParamsSchema),
-  exposeIdAsSubstationId,
-  checkAreaAccess(),
-  asyncHandler(substationController.getById)
+  validateParams(incomingSourceIdParamsSchema),
+  asyncHandler(incomingSourceController.getById)
 );
 
 /**
  * @openapi
- * /api/v1/substations/{id}:
+ * /api/v1/incoming-sources/{id}:
  *   patch:
- *     summary: Update Substation
- *     tags: [Substations]
+ *     summary: Update Incoming Source
+ *     tags: [Incoming Sources]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -239,34 +229,25 @@ router.get(
  *           schema:
  *             type: object
  *             properties:
- *               name:
+ *               sourceName:
  *                 type: string
- *               code:
+ *               sourceType:
  *                 type: string
  *               voltageLevelKv:
  *                 type: number
- *               address:
+ *               feederName:
  *                 type: string
- *               latitude:
- *                 type: number
- *                 minimum: -90
- *                 maximum: 90
- *               longitude:
- *                 type: number
- *                 minimum: -180
- *                 maximum: 180
- *               commissioningDate:
+ *               meterNumber:
  *                 type: string
- *                 format: date
  *               isActive:
  *                 type: boolean
  *     responses:
  *       200:
- *         description: Substation updated successfully
+ *         description: Incoming Source updated successfully
  *       403:
  *         description: Role or area access denied
  *       404:
- *         description: Substation not found
+ *         description: Incoming Source not found
  *       409:
  *         description: Duplicate or deleted record
  *       422:
@@ -276,19 +257,17 @@ router.patch(
   "/:id",
   authenticate,
   authorizeRoles(RoleName.ADMIN, RoleName.EE, RoleName.AE),
-  validateParams(substationIdParamsSchema),
-  validateBody(updateSubstationBodySchema),
-  exposeIdAsSubstationId,
-  checkAreaAccess(),
-  asyncHandler(substationController.update)
+  validateParams(incomingSourceIdParamsSchema),
+  validateBody(updateIncomingSourceBodySchema),
+  asyncHandler(incomingSourceController.update)
 );
 
 /**
  * @openapi
- * /api/v1/substations/{id}:
+ * /api/v1/incoming-sources/{id}:
  *   delete:
- *     summary: Soft delete Substation
- *     tags: [Substations]
+ *     summary: Soft delete Incoming Source
+ *     tags: [Incoming Sources]
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -300,22 +279,20 @@ router.patch(
  *           format: uuid
  *     responses:
  *       200:
- *         description: Substation deleted successfully
+ *         description: Incoming Source deleted successfully
  *       403:
  *         description: Role or area access denied
  *       404:
- *         description: Substation not found
+ *         description: Incoming Source not found
  *       409:
- *         description: Substation contains equipment or is already deleted
+ *         description: Incoming Source is already deleted
  */
 router.delete(
   "/:id",
   authenticate,
-  authorizeRoles(RoleName.ADMIN),
-  validateParams(substationIdParamsSchema),
-  exposeIdAsSubstationId,
-  checkAreaAccess(),
-  asyncHandler(substationController.softDelete)
+  authorizeRoles(RoleName.ADMIN, RoleName.EE, RoleName.AE),
+  validateParams(incomingSourceIdParamsSchema),
+  asyncHandler(incomingSourceController.softDelete)
 );
 
-export { router as substationRoutes };
+export { router as incomingSourceRoutes };

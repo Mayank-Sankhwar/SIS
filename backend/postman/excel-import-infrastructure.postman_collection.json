@@ -1,0 +1,101 @@
+{
+  "info": {
+    "name": "Excel Import Infrastructure",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api/v1"
+    },
+    {
+      "key": "adminToken",
+      "value": ""
+    },
+    {
+      "key": "workbookPath",
+      "value": "C:\\\\path\\\\to\\\\substation-information-system.xlsx"
+    }
+  ],
+  "item": [
+    {
+      "name": "Validate SIS Workbook",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/imports/validate",
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "file",
+              "type": "file",
+              "src": "{{workbookPath}}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Import SIS Workbook - UPSERT",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/imports",
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "file",
+              "type": "file",
+              "src": "{{workbookPath}}"
+            },
+            {
+              "key": "mode",
+              "type": "text",
+              "value": "UPSERT"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Import SIS Workbook - INSERT ONLY",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/imports",
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "file",
+              "type": "file",
+              "src": "{{workbookPath}}"
+            },
+            {
+              "key": "mode",
+              "type": "text",
+              "value": "INSERT_ONLY"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

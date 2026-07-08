@@ -1,0 +1,71 @@
+{
+  "info": {
+    "name": "Dashboard Phase 1",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000/api/v1" },
+    { "key": "adminToken", "value": "" },
+    { "key": "eeToken", "value": "" },
+    { "key": "aeToken", "value": "" },
+    { "key": "jeToken", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Summary - Admin",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+        "url": "{{baseUrl}}/dashboard/summary"
+      }
+    },
+    {
+      "name": "Equipment Summary - Admin",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+        "url": "{{baseUrl}}/dashboard/equipment-summary"
+      }
+    },
+    {
+      "name": "Hierarchy Summary - Admin",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+        "url": "{{baseUrl}}/dashboard/hierarchy-summary"
+      }
+    },
+    {
+      "name": "Summary - EE Scoped",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{eeToken}}" }],
+        "url": "{{baseUrl}}/dashboard/summary"
+      }
+    },
+    {
+      "name": "Summary - AE Scoped",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{aeToken}}" }],
+        "url": "{{baseUrl}}/dashboard/summary"
+      }
+    },
+    {
+      "name": "Summary - JE Scoped",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer {{jeToken}}" }],
+        "url": "{{baseUrl}}/dashboard/summary"
+      }
+    },
+    {
+      "name": "Unauthorized",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/dashboard/summary"
+      }
+    }
+  ]
+}

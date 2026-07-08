@@ -1,0 +1,329 @@
+{
+  "info": {
+    "name": "Transformer CRUD",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api/v1"
+    },
+    {
+      "key": "adminToken",
+      "value": ""
+    },
+    {
+      "key": "eeToken",
+      "value": ""
+    },
+    {
+      "key": "aeToken",
+      "value": ""
+    },
+    {
+      "key": "jeToken",
+      "value": ""
+    },
+    {
+      "key": "substationId",
+      "value": ""
+    },
+    {
+      "key": "outsideSubstationId",
+      "value": ""
+    },
+    {
+      "key": "transformerId",
+      "value": ""
+    },
+    {
+      "key": "deletedTransformerId",
+      "value": ""
+    },
+    {
+      "key": "discomId",
+      "value": ""
+    },
+    {
+      "key": "zoneId",
+      "value": ""
+    },
+    {
+      "key": "verticalId",
+      "value": ""
+    },
+    {
+      "key": "subVerticalId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Create",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/transformers",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"substationId\": \"{{substationId}}\",\n  \"transformerCode\": \"PM-PTR-001\",\n  \"capacityMva\": 10,\n  \"primaryVoltageKv\": 33,\n  \"secondaryVoltageKv\": 11,\n  \"make\": \"BHEL\",\n  \"serialNumber\": \"PM-TR-001\",\n  \"commissioningDate\": \"2021-04-15\",\n  \"isActive\": true\n}"
+        }
+      }
+    },
+    {
+      "name": "Read",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/transformers/{{transformerId}}"
+      }
+    },
+    {
+      "name": "List",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/transformers"
+      }
+    },
+    {
+      "name": "Search",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/transformers?search=PM-TR"
+      }
+    },
+    {
+      "name": "Pagination",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/transformers?page=1&limit=10&sortBy=transformerCode&sortOrder=asc"
+      }
+    },
+    {
+      "name": "Update",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/transformers/{{transformerId}}",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"capacityMva\": 12.5,\n  \"primaryVoltageKv\": 33,\n  \"secondaryVoltageKv\": 11,\n  \"make\": \"ABB\",\n  \"serialNumber\": \"PM-TR-001-UPD\",\n  \"commissioningDate\": \"2021-05-01\",\n  \"isActive\": true\n}"
+        }
+      }
+    },
+    {
+      "name": "Delete",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/transformers/{{transformerId}}"
+      }
+    },
+    {
+      "name": "Duplicate Transformer Code",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/transformers",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"substationId\": \"{{substationId}}\",\n  \"transformerCode\": \"PM-PTR-001\",\n  \"capacityMva\": 10,\n  \"primaryVoltageKv\": 33,\n  \"secondaryVoltageKv\": 11,\n  \"serialNumber\": \"PM-TR-002\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Duplicate Serial Number",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/transformers",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"substationId\": \"{{substationId}}\",\n  \"transformerCode\": \"PM-PTR-002\",\n  \"capacityMva\": 10,\n  \"primaryVoltageKv\": 33,\n  \"secondaryVoltageKv\": 11,\n  \"serialNumber\": \"PM-TR-001\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Invalid Capacity",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/transformers",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"substationId\": \"{{substationId}}\",\n  \"transformerCode\": \"PM-PTR-BAD-CAP\",\n  \"capacityMva\": 0,\n  \"primaryVoltageKv\": 33,\n  \"secondaryVoltageKv\": 11\n}"
+        }
+      }
+    },
+    {
+      "name": "Future Commissioning Date",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/transformers",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"substationId\": \"{{substationId}}\",\n  \"transformerCode\": \"PM-PTR-FUTURE\",\n  \"capacityMva\": 10,\n  \"primaryVoltageKv\": 33,\n  \"secondaryVoltageKv\": 11,\n  \"commissioningDate\": \"2999-01-01\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Unauthorized",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/transformers"
+      }
+    },
+    {
+      "name": "Forbidden - JE Create",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jeToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/transformers",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"substationId\": \"{{substationId}}\",\n  \"transformerCode\": \"JE-PTR-001\",\n  \"capacityMva\": 10,\n  \"primaryVoltageKv\": 33,\n  \"secondaryVoltageKv\": 11\n}"
+        }
+      }
+    },
+    {
+      "name": "Forbidden - Outside Area",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{eeToken}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/transformers",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"substationId\": \"{{outsideSubstationId}}\",\n  \"transformerCode\": \"OUTSIDE-PTR-001\",\n  \"capacityMva\": 10,\n  \"primaryVoltageKv\": 33,\n  \"secondaryVoltageKv\": 11\n}"
+        }
+      }
+    },
+    {
+      "name": "Soft Delete Retrieval",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/transformers/{{deletedTransformerId}}"
+      }
+    },
+    {
+      "name": "List Include Deleted",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}"
+          }
+        ],
+        "url": "{{baseUrl}}/transformers?includeDeleted=true"
+      }
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+# Editor and local workspace metadata
+.vscode/
+.agents/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build and coverage output
+dist/
+**/dist/
+coverage/
+**/coverage/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Uploads and generated artifacts
+uploads/
+**/uploads/
+outputs/
+**/outputs/
+
+# OS files
+.DS_Store
+Thumbs.db
