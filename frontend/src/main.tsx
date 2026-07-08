@@ -6,6 +6,7 @@ import { Toaster } from 'react-hot-toast'
 
 import './styles/globals.css'
 import { ThemeProvider } from './contexts/ThemeContext'
+import { AuthProvider } from './contexts/AuthContext'
 import { router } from './routes'
 import { queryClient } from './lib/queryClient'
 
@@ -13,8 +14,10 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ThemeProvider>
       <QueryClientProvider client={queryClient}>
-        <RouterProvider router={router} />
-        <Toaster position="top-right" />
+        <AuthProvider>
+          <RouterProvider router={router} />
+          <Toaster position="top-right" />
+        </AuthProvider>
       </QueryClientProvider>
     </ThemeProvider>
   </StrictMode>,

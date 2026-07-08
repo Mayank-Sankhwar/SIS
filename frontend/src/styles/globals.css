@@ -59,6 +59,21 @@ body {
   color: hsl(var(--foreground));
 }
 
+@layer base {
+  input,
+  textarea,
+  select {
+    color: hsl(var(--foreground));
+    caret-color: hsl(var(--foreground));
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: hsl(var(--muted-foreground));
+    opacity: 1;
+  }
+}
+
 * {
   box-sizing: border-box;
 }

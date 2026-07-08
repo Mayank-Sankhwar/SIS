@@ -1,6 +1,7 @@
 import axios from 'axios'
 
 import { appConfig } from '../config/env'
+import { AuthStorage } from '../utils/authStorage'
 
 export const apiClient = axios.create({
   baseURL: appConfig.apiBaseUrl,
@@ -11,7 +12,7 @@ export const apiClient = axios.create({
 })
 
 apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('access_token')
+  const token = AuthStorage.getAccessToken()
 
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
@@ -19,3 +20,14 @@ apiClient.interceptors.request.use((config) => {
 
   return config
 })
+
+apiClient.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    if (error.response?.status === 401) {
+      AuthStorage.clearAccessToken()
+    }
+
+    return Promise.reject(error)
+  },
+)
