@@ -27,7 +27,7 @@ export default function Sidebar({ collapsed, mobileOpen, onToggleCollapsed, onCl
       aria-label="Application navigation"
     >
       <div className="flex h-16 items-center gap-3 border-b border-white/10 px-4">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-blue-600 text-sm font-bold text-white shadow-sm">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-cyan-500 text-sm font-bold text-white shadow-sm">
           K
         </div>
         <div className={cn('min-w-0 transition-opacity duration-200', collapsed && 'pointer-events-none opacity-0')}>
@@ -70,10 +70,10 @@ export default function Sidebar({ collapsed, mobileOpen, onToggleCollapsed, onCl
                         onClick={onCloseMobile}
                         title={collapsed ? item.label : undefined}
                         className={cn(
-                          'group flex h-10 items-center gap-3 rounded-md px-3 text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400',
+                          'group flex h-10 items-center gap-3 rounded-xl px-3 text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400',
                           collapsed && 'justify-center px-0',
                           active
-                            ? 'bg-blue-600 text-white shadow-sm'
+                            ? 'bg-blue-600 text-white shadow-[0_10px_24px_rgba(59,130,246,0.24)]'
                             : 'text-slate-300 hover:bg-white/10 hover:text-white',
                         )}
                       >
@@ -94,7 +94,7 @@ export default function Sidebar({ collapsed, mobileOpen, onToggleCollapsed, onCl
           type="button"
           onClick={onToggleCollapsed}
           className={cn(
-            'hidden h-10 w-full items-center gap-3 rounded-md px-3 text-sm font-medium text-slate-300 transition hover:bg-white/10 hover:text-white lg:flex',
+            'hidden h-10 w-full items-center gap-3 rounded-xl px-3 text-sm font-medium text-slate-300 transition hover:bg-white/10 hover:text-white lg:flex',
             collapsed && 'justify-center px-0',
           )}
           aria-label={collapsed ? 'Expand navigation' : 'Collapse navigation'}

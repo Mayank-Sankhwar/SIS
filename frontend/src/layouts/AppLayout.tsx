@@ -17,7 +17,7 @@ export default function AppLayout() {
   }
 
   return (
-    <div className="flex min-h-screen bg-slate-100 text-slate-950 dark:bg-slate-950 dark:text-slate-50">
+    <div className="flex min-h-screen bg-slate-100 text-slate-950 transition-colors duration-200 dark:bg-slate-950 dark:text-slate-50">
       <Sidebar
         collapsed={sidebarCollapsed}
         mobileOpen={mobileSidebarOpen}
@@ -26,8 +26,10 @@ export default function AppLayout() {
       />
       <div className="flex min-w-0 flex-1 flex-col">
         <Topbar onOpenMobile={() => setMobileSidebarOpen(true)} onLogout={handleLogout} />
-        <main className="min-w-0 flex-1 bg-slate-50 dark:bg-slate-900">
-          <Outlet />
+        <main className="min-w-0 flex-1 bg-slate-50/90 px-1 py-1 transition-colors duration-200 dark:bg-slate-900/90 sm:px-2 sm:py-2">
+          <div className="page-transition h-full min-h-full">
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>

@@ -70,7 +70,7 @@ export const navigationGroups: NavigationGroup[] = [
   {
     items: [
       { label: 'Reports', href: '/reports', icon: FileText },
-      { label: 'Administration', href: '/administration', icon: BarChart3 },
+      { label: 'Users', href: '/admin/users', icon: BarChart3 },
       { label: 'Settings', href: '/settings', icon: Settings },
     ],
   },

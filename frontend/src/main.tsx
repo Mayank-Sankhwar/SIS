@@ -16,7 +16,31 @@ createRoot(document.getElementById('root')!).render(
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <RouterProvider router={router} />
-          <Toaster position="top-right" />
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              duration: 4000,
+              style: {
+                borderRadius: '14px',
+                padding: '12px 14px',
+                boxShadow: '0 20px 45px rgba(15, 23, 42, 0.16)',
+              },
+              success: {
+                style: {
+                  background: '#ecfdf3',
+                  color: '#065f46',
+                  border: '1px solid #a7f3d0',
+                },
+              },
+              error: {
+                style: {
+                  background: '#fef2f2',
+                  color: '#991b1b',
+                  border: '1px solid #fecaca',
+                },
+              },
+            }}
+          />
         </AuthProvider>
       </QueryClientProvider>
     </ThemeProvider>

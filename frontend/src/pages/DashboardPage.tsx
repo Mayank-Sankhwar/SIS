@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   Activity,
   AlertTriangle,
@@ -266,6 +266,7 @@ function DashboardMapPanel({ markers }: { markers: DashboardMapMarker[] }) {
 
 export default function DashboardPage() {
   const [filters, setFilters] = useState<DashboardFilters>({})
+  const [lastUpdatedAt, setLastUpdatedAt] = useState<string>(() => formatDateTime(new Date().toISOString()))
 
   const summaryQuery = useDashboardSummary(filters)
   const equipmentSummaryQuery = useEquipmentSummary(filters)
@@ -295,6 +296,10 @@ export default function DashboardPage() {
   const isRefreshing = queries.some((query) => query.isFetching) && !isInitialLoading
   const hasError = queries.some((query) => query.isError)
 
+  useEffect(() => {
+    setLastUpdatedAt(formatDateTime(new Date().toISOString()))
+  }, [filters, isRefreshing])
+
   const updateFilter = (key: DashboardFilterKey, value: string) => {
     setFilters((current) => {
       const next: DashboardFilters = { ...current, [key]: value || undefined }
@@ -323,6 +328,7 @@ export default function DashboardPage() {
   }
 
   const retryAll = () => {
+    setLastUpdatedAt(formatDateTime(new Date().toISOString()))
     void Promise.all(queries.map((query) => query.refetch()))
   }
 
@@ -453,14 +459,21 @@ export default function DashboardPage() {
                 Live operational view for hierarchy, assets, imports, and system readiness.
               </p>
             </div>
-            <button
-              type="button"
-              onClick={retryAll}
-              className="inline-flex h-10 w-fit items-center justify-center gap-2 rounded-md bg-slate-900 px-4 text-sm font-semibold text-white transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-blue-600 dark:hover:bg-blue-500"
-            >
-              <RefreshCcw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} aria-hidden="true" />
-              Refresh
-            </button>
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm text-slate-600 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
+                <span className={`h-2.5 w-2.5 rounded-full ${isRefreshing ? 'animate-pulse bg-amber-500' : 'bg-emerald-500'}`} aria-hidden="true" />
+                {isRefreshing ? 'Refreshing now' : 'Auto-refresh ready'}
+              </div>
+              <div className="text-sm text-slate-500 dark:text-slate-400">Last updated {lastUpdatedAt}</div>
+              <button
+                type="button"
+                onClick={retryAll}
+                className="inline-flex h-10 w-fit items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 text-sm font-semibold text-white transition duration-200 hover:-translate-y-0.5 hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-blue-600 dark:hover:bg-blue-500"
+              >
+                <RefreshCcw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} aria-hidden="true" />
+                Refresh
+              </button>
+            </div>
           </div>
 
           <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
